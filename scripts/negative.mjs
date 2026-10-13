@@ -45,6 +45,7 @@ function check(id, path, text, command, expected, pass = false) {
     env: {
       ...process.env,
       GC_CHECKOUT_SCOPE: '',
+      GC_NEGATIVE_HARNESS: '1',
     },
     encoding: 'utf8',
     timeout: 120_000,
