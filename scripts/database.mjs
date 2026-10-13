@@ -9,8 +9,12 @@ import {
   allocatePort,
   assertPortClosed,
 } from './database-isolation.mjs';
+import { containerBackend } from './database-backend.mjs';
 
 const config = JSON.parse(readFileSync('config/database-probe.json', 'utf8'));
+const backend = containerBackend(
+  process.env.GC_CONTAINER_BACKEND ?? config.backend,
+);
 const token = randomUUID();
 const directory = `evidence/contained/runs/${token}`;
 mkdirSync(directory, { recursive: true });
@@ -22,7 +26,7 @@ const target = {
 };
 const report = {
   phase: 'BOOTSTRAP',
-  backend: config.backend,
+  backend: backend.name,
   target,
   containersCreated: false,
   databaseConnected: false,
@@ -34,6 +38,7 @@ const report = {
     [
       'scripts/database.mjs',
       'scripts/database-isolation.mjs',
+      'scripts/database-backend.mjs',
       'config/database-probe.json',
     ].map((path) => [
       path,
@@ -44,7 +49,7 @@ const report = {
 let creationAttempted = false;
 
 function command(args, timeout = 10_000) {
-  const run = spawnSync(config.executable, args, {
+  const run = spawnSync(backend.executable, args, {
     encoding: 'utf8',
     timeout,
     maxBuffer: 5 * 1024 * 1024,
@@ -53,7 +58,7 @@ function command(args, timeout = 10_000) {
   // Inspect only a newly created task resource; never dump existing environments.
   writeFileSync(log, `${run.stdout ?? ''}${run.stderr ?? ''}`);
   report.commands.push({
-    command: [config.executable, ...args],
+    command: [backend.executable, ...args],
     exitCode: run.status ?? 1,
     signal: run.signal,
     error: run.error?.message,
@@ -76,7 +81,7 @@ function inspect() {
   const records = JSON.parse(output);
   if (!Array.isArray(records) || records.length !== 1)
     throw new Error('MYSQL_PROBE_INSPECT_UNKNOWN');
-  return records[0];
+  return backend.normalize(records[0]);
 }
 
 async function queryProbe() {
@@ -123,11 +128,11 @@ async function cleanup() {
     // A changed mount configuration fails the probe, but its own ID can still be removed.
     assertIdentity(container, target);
     requireSuccess(
-      command(['delete', '--force', target.name], 30_000),
+      command(backend.remove(target.name), 30_000),
       'MYSQL_PROBE_CLEANUP_FAILED',
     );
     const inventory = requireSuccess(
-      command(['list', '--all']),
+      command(backend.inventory),
       'MYSQL_PROBE_CLEANUP_INVENTORY_UNKNOWN',
     );
     report.inventoryAfter = inventory;
@@ -154,14 +159,39 @@ try {
     command(['--version']),
     'MYSQL_PROBE_RESOURCE_MISSING',
   ).trim();
-  const status = requireSuccess(
-    command(['system', 'status']),
-    'MYSQL_PROBE_RESOURCE_MISSING',
-  );
-  if (!/^status\s+running\s*$/m.test(status))
-    throw new Error('MYSQL_PROBE_SERVICE_NOT_RUNNING');
+  if (backend.name === 'apple') {
+    const status = requireSuccess(
+      command(['system', 'status']),
+      'MYSQL_PROBE_RESOURCE_MISSING',
+    );
+    if (!/^status\s+running\s*$/m.test(status))
+      throw new Error('MYSQL_PROBE_SERVICE_NOT_RUNNING');
+  } else {
+    requireSuccess(
+      command(['info', '--format', '{{.ServerVersion}}']),
+      'MYSQL_PROBE_RESOURCE_MISSING',
+    );
+    const context = JSON.parse(
+      requireSuccess(
+        command([
+          'context',
+          'inspect',
+          '--format',
+          '{{json .Endpoints.docker.Host}}',
+        ]),
+        'MYSQL_PROBE_CONTEXT_UNKNOWN',
+      ),
+    );
+    if (
+      typeof context !== 'string' ||
+      !context.startsWith('unix://') ||
+      (process.env.DOCKER_HOST &&
+        !process.env.DOCKER_HOST.startsWith('unix://'))
+    )
+      throw new Error('MYSQL_PROBE_NONLOCAL_CONTEXT_REFUSED');
+  }
   const inventory = requireSuccess(
-    command(['list', '--all']),
+    command(backend.inventory),
     'MYSQL_PROBE_INVENTORY_UNKNOWN',
   );
   report.inventoryBefore = inventory;

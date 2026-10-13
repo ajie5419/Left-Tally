@@ -32,6 +32,7 @@ const run = spawnSync(node, command === 'pnpm' ? [pnpm, ...args] : args, {
   env: {
     ...process.env,
     PATH: [
+      resolve('.tools/ci-tools/bin'),
       dirname(node),
       resolve(home, 'tools/pnpm', pnpmVersion, 'shims'),
       process.env.PATH,

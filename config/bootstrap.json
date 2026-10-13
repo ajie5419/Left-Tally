@@ -13,6 +13,7 @@
     "tests/unit/health.test.ts",
     "tests/unit/scanner.test.ts",
     "tests/unit/database-isolation.test.ts",
+    "tests/unit/ci.test.ts",
     "tests/e2e/bootstrap.spec.ts",
     "scripts/negative.mjs",
     "scripts/database.mjs"

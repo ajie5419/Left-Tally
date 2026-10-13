@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { files, disabledTests } from './files.mjs';
+import { resultErrors } from './ci/results.mjs';
+import { legacyScope } from './ci/legacy.mjs';
 
 const baseline = {
   'AGENTS.md':
@@ -34,6 +36,7 @@ for (const path of [
   'tests/unit/health.test.ts',
   'tests/unit/scanner.test.ts',
   'tests/unit/database-isolation.test.ts',
+  'tests/unit/ci.test.ts',
   'tests/e2e/bootstrap.spec.ts',
   'scripts/negative.mjs',
   'scripts/database.mjs',
@@ -50,7 +53,13 @@ for (const [path, expected] of Object.entries(baseline)) {
 const opening = JSON.parse(
   readFileSync('evidence/bootstrap/opening-sha256.json', 'utf8'),
 );
-for (const [path, hash] of Object.entries(opening)) {
+let legacy = { paths: opening, userArtifacts: 'unknown' };
+try {
+  legacy = legacyScope(opening, baseline);
+} catch (error) {
+  errors.push(error.message);
+}
+for (const [path, hash] of Object.entries(legacy.paths)) {
   if (
     !existsSync(path) ||
     createHash('sha256').update(readFileSync(path)).digest('hex') !== hash
@@ -75,13 +84,15 @@ if (argument !== -1) {
         errors.push(`REQUIRED_RESULT_FAILED_OR_MISSING: ${task}`);
       }
     }
+    errors.push(...resultErrors(report));
   }
 }
 console.log(
   JSON.stringify(
     {
       phase: manifest.phase,
-      oldFilesChecked: Object.keys(opening).length,
+      oldFilesChecked: Object.keys(legacy.paths).length,
+      legacyUserArtifacts: legacy.userArtifacts,
       errors,
       enforcement: 'LOCAL_SAME_USER_WRITABLE; not CI or remote protection',
     },

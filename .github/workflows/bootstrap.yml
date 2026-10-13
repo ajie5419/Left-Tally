@@ -1,0 +1,67 @@
+name: Bootstrap candidate verification
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PROTO_HOME: ${{ github.workspace }}/.tools/proto-home
+      PROTO_OFFLINE: 'false'
+      GC_CONTAINER_BACKEND: docker
+      GC_CHECKOUT_SCOPE: versioned-engineering
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: moonrepo/setup-toolchain@261c62cb5b0f580c7be7c8cd0f023a2e96756095 # v0.6.4
+        with:
+          proto-version: '0.63.1'
+          cache: false
+          auto-install: false
+      - name: Install locked toolchain
+        run: node scripts/ci/run-step.mjs proto-install proto install
+      - name: Install checked tools
+        run: node scripts/ci/run-step.mjs tools-install node scripts/toolchain.mjs node scripts/ci/install-tools.mjs
+      - name: Install frozen dependencies into the verification store
+        run: node scripts/ci/run-step.mjs dependencies-install node scripts/toolchain.mjs pnpm install --frozen-lockfile --store-dir .tools/pnpm-store
+      - name: Validate workflow
+        run: node scripts/ci/run-step.mjs workflow-check .tools/ci-tools/bin/actionlint
+      - name: Install Chromium and system dependencies
+        run: node scripts/ci/run-step.mjs browser-install node scripts/toolchain.mjs pnpm exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/playwright
+      - name: Verify bootstrap
+        run: node scripts/toolchain.mjs pnpm verify
+      - name: Preserve success and failure evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bootstrap-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            evidence/bootstrap/
+            evidence/contained/runs/
+            evidence/c/runtime/
+          if-no-files-found: error
+
+  summary:
+    if: ${{ always() }}
+    needs: [verify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Reject missing, failed, cancelled or skipped verification
+        run: node scripts/ci/summary.mjs
+        env:
+          GC_JOB_RESULTS: ${{ toJSON(needs) }}

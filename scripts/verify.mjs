@@ -1,30 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { files } from './files.mjs';
+import { sourceSnapshot } from './ci/snapshot.mjs';
+import { resultErrors } from './ci/results.mjs';
 
 const directory = 'evidence/bootstrap/verify';
 mkdirSync(directory, { recursive: true });
-const paths = [
-  ...files(
-    ['apps', 'packages', 'tests', 'scripts', 'config'],
-    ['.ts', '.vue', '.mjs', '.json', '.html', '.css'],
-  ),
-  'package.json',
-  'pnpm-workspace.yaml',
-  'pnpm-lock.yaml',
-  '.prototools',
-  'tsconfig.json',
-  'eslint.config.mjs',
-  '.prettierrc.json',
-  '.gitignore',
-];
-const hashes = Object.fromEntries(
-  paths.map((path) => [
-    path,
-    createHash('sha256').update(readFileSync(path)).digest('hex'),
-  ]),
-);
+const hashes = sourceSnapshot();
 writeFileSync(
   `${directory}/source-sha256.json`,
   JSON.stringify(hashes, null, 2) + '\n',
@@ -70,12 +51,29 @@ for (const task of required) {
   console.log(`${task}: exit=${run.status ?? 1}; ${log}`);
 }
 const reportPath = `${directory}/results.json`;
+const gitHead = spawnSync('rtk', ['git', 'rev-parse', 'HEAD'], {
+  encoding: 'utf8',
+});
 const report = {
   phase: 'BOOTSTRAP',
   node: process.versions.node,
   pnpm: pnpmVersion.stdout.trim(),
   environmentValid,
   sourceHashFile: `${directory}/source-sha256.json`,
+  sourceChangedDuringVerification: [],
+  gitCommit:
+    gitHead.status === 0 && /^[a-f0-9]{40}\s*$/.test(gitHead.stdout)
+      ? gitHead.stdout.trim()
+      : null,
+  requestedCICommit: process.env.GITHUB_SHA ?? null,
+  sourceIdentity:
+    'filesystem SHA256 snapshot; Git HEAD alone does not identify uncommitted changes',
+  baselineHashes: Object.fromEntries(
+    ['AGENTS.md', 'Grand Comptroller/工程治理与门禁基线-2026-10-13.md'].map(
+      (path) => [path, hashes[path]],
+    ),
+  ),
+  trustedRemoteSource: null,
   results,
 };
 writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
@@ -93,16 +91,17 @@ results.push({
   signal: gate.signal,
   log: `${directory}/check-gate.log`,
 });
-const changed = paths.filter(
-  (path) =>
-    createHash('sha256').update(readFileSync(path)).digest('hex') !==
-    hashes[path],
-);
+const after = sourceSnapshot();
+const changed = [
+  ...new Set([...Object.keys(hashes), ...Object.keys(after)]),
+].filter((path) => after[path] !== hashes[path]);
 report.sourceChangedDuringVerification = changed;
+report.evidenceErrors = resultErrors(report);
 report.success =
   environmentValid &&
   results.every((result) => result.exitCode === 0 && !result.signal) &&
-  changed.length === 0;
+  changed.length === 0 &&
+  report.evidenceErrors.length === 0;
 writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
 console.log(`verify: ${report.success ? 'PASS' : 'FAIL'} (BOOTSTRAP only)`);
 process.exitCode = report.success ? 0 : 1;

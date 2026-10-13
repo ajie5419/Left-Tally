@@ -10,7 +10,7 @@
   "scripts": {
     "check:types": "vue-tsc --noEmit -p apps/web/tsconfig.json && tsc --noEmit -p tsconfig.json",
     "check:lint": "eslint apps packages tests scripts config --max-warnings 0",
-    "check:format": "prettier --check apps packages tests scripts config package.json pnpm-workspace.yaml tsconfig.json eslint.config.mjs .prettierrc.json",
+    "check:format": "prettier --check apps packages tests scripts config .github/workflows package.json pnpm-workspace.yaml tsconfig.json eslint.config.mjs .prettierrc.json",
     "check:dependencies": "node scripts/dependencies.mjs",
     "check:source": "node scripts/source.mjs",
     "check:lockfile": "pnpm install --frozen-lockfile --lockfile-only --offline --store-dir .tools/pnpm-store",

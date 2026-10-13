@@ -22,6 +22,7 @@ function walk(directory) {
         '.aws',
         '.codex',
         '.agents',
+        '.git',
       ].includes(entry.name) ||
       entry.name.startsWith('.env')
     )
@@ -50,6 +51,7 @@ const roots = [
   'scripts/',
   'config/',
   'evidence/',
+  '.github/',
 ];
 const rootFiles = [
   'package.json',
@@ -62,11 +64,13 @@ const rootFiles = [
   'tsconfig.json',
 ];
 const review = 'Grand Comptroller/本地门禁复核记录-2026-10-13.md';
+const ciReview = 'Grand Comptroller/CI与版本管理复核记录-2026-10-13.md';
 const outside = newFiles.filter(
   (path) =>
     !roots.some((root) => path.startsWith(root)) &&
     !rootFiles.includes(path) &&
-    path !== review,
+    path !== review &&
+    path !== ciReview,
 );
 const sourceHashes = JSON.parse(
   readFileSync('evidence/bootstrap/verify/source-sha256.json', 'utf8'),
@@ -105,7 +109,6 @@ process.exitCode =
   outside.length ||
   changedSource.length ||
   existsSync(negatives.temporary) ||
-  !probe.cleanupVerified ||
-  report.gitCreated
+  !probe.cleanupVerified
     ? 1
     : 0;

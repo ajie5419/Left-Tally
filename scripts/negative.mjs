@@ -116,6 +116,7 @@ function vueLines(count) {
 
 try {
   for (const path of [
+    '.github',
     'apps',
     'packages',
     'tests',
