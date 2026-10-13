@@ -1,0 +1,10 @@
+{
+  "name": "@gc/api",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@gc/contracts": "workspace:*",
+    "@hono/node-server": "1.19.9",
+    "hono": "4.11.7"
+  }
+}

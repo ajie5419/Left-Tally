@@ -1,0 +1,156 @@
+:root {
+  color: #193347;
+  background: #f3f6f8;
+  font:
+    14px/1.7 'PingFang SC',
+    'Noto Sans CJK SC',
+    'Microsoft YaHei',
+    sans-serif;
+  --blue: #245a88;
+  --muted: #607284;
+  --line: #d9e2e9;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  font: inherit;
+}
+.top {
+  display: flex;
+  gap: 20px;
+  align-items: baseline;
+  border-top: 6px solid var(--blue);
+  background: white;
+  padding: 19px 28px;
+}
+.brand {
+  font-size: 20px;
+  font-weight: 650;
+}
+.subtitle {
+  color: var(--muted);
+}
+.notice {
+  padding: 8px 28px;
+  background: #eaf0f5;
+  color: #465e73;
+}
+.shell {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  min-height: calc(100vh - 111px);
+}
+nav {
+  background: #e7eef3;
+  border-right: 1px solid var(--line);
+  padding: 24px 14px;
+}
+nav a {
+  display: block;
+  padding: 12px;
+  background: white;
+  box-shadow: inset 3px 0 var(--blue);
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+nav p {
+  padding: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+main {
+  padding: 25px 28px;
+  min-width: 0;
+  max-width: 1000px;
+  width: 100%;
+}
+h1 {
+  color: inherit;
+  font-size: 25px;
+  margin: 0 0 8px;
+  font-weight: 650;
+}
+h2 {
+  color: inherit;
+  font-size: 17px;
+  margin: 0;
+}
+.ant-btn-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.intro {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+.panel {
+  background: white;
+  border: 1px solid var(--line);
+  padding: 24px;
+}
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.footnote {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 20px 0 0;
+}
+.scope {
+  margin-top: 28px;
+}
+dl {
+  border-top: 1px solid var(--line);
+}
+dl div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+dt {
+  color: var(--muted);
+}
+dd {
+  margin: 0;
+}
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #b47b22;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .top {
+    flex-direction: column;
+    gap: 0;
+    padding: 14px 18px;
+  }
+  .notice {
+    padding: 8px 18px;
+  }
+  .shell {
+    display: block;
+  }
+  nav {
+    padding: 10px 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  nav p {
+    display: none;
+  }
+  main {
+    padding: 22px 18px;
+  }
+  .panel {
+    padding: 18px;
+  }
+}

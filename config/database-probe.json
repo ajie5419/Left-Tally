@@ -1,0 +1,7 @@
+{
+  "backend": "apple",
+  "executable": "/usr/local/bin/container",
+  "image": "docker.io/library/mysql:8.4",
+  "versionPrefix": "8.4.",
+  "engine": "InnoDB"
+}

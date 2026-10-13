@@ -1,0 +1,38 @@
+{
+  "verifiedOn": "2026-10-13",
+  "toolchain": {
+    "proto": "0.63.1",
+    "node": "24.21.0",
+    "pnpm": "10.28.2",
+    "rtk": "0.51.0"
+  },
+  "frontend": {
+    "vue": "3.4.38",
+    "ant-design-vue": "3.2.20",
+    "vue-router": "4.4.5",
+    "pinia": "2.2.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.1"
+  },
+  "databaseCandidate": {
+    "prisma": "7.10.0",
+    "adapter": "@prisma/adapter-mariadb@7.10.0",
+    "underlyingDriver": "mariadb@3.4.5",
+    "nodeEngine": "^20.19 || ^22.12 || >=24.0",
+    "installed": false,
+    "runtimeVerified": false,
+    "probeDriverOnly": "mysql2@3.16.1",
+    "requestedDatabaseLine": "MySQL 8.4",
+    "schemaImplemented": false
+  },
+  "sources": [
+    "https://nodejs.org/dist/index.json",
+    "https://vite.dev/guide/",
+    "https://hono.dev/docs/getting-started/nodejs",
+    "https://www.prisma.io/docs/orm/reference/system-requirements",
+    "https://www.prisma.io/docs/orm/overview/databases/mysql",
+    "https://registry.npmjs.org/prisma/7.10.0",
+    "https://registry.npmjs.org/@prisma%2fadapter-mariadb/7.10.0",
+    "https://registry.npmjs.org/mariadb/3.4.5"
+  ]
+}

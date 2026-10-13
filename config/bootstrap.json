@@ -1,0 +1,21 @@
+{
+  "phase": "BOOTSTRAP",
+  "required": [
+    "check:static",
+    "test:unit",
+    "build",
+    "test:integration",
+    "check:migrations",
+    "test:negative",
+    "test:e2e"
+  ],
+  "suites": [
+    "tests/unit/health.test.ts",
+    "tests/unit/scanner.test.ts",
+    "tests/unit/database-isolation.test.ts",
+    "tests/e2e/bootstrap.spec.ts",
+    "scripts/negative.mjs",
+    "scripts/database.mjs"
+  ],
+  "migrationApplicability": "INITIAL_NO_SCHEMA_NO_PREVIOUS_DELIVERY"
+}
