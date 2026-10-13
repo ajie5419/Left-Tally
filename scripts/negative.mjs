@@ -42,6 +42,10 @@ function check(id, path, text, command, expected, pass = false) {
   if (command === lint) actual.push(path, '--max-warnings', '0');
   const run = spawnSync(actual[0], actual.slice(1), {
     cwd: temporary,
+    env: {
+      ...process.env,
+      GC_CHECKOUT_SCOPE: '',
+    },
     encoding: 'utf8',
     timeout: 120_000,
     maxBuffer: 5 * 1024 * 1024,
