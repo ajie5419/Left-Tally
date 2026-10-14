@@ -47,12 +47,35 @@ export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
     })
     .strict();
 
+export const jsonLiteralSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+]);
+
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: JsonValue }
+  | JsonValue[];
+
+export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    jsonLiteralSchema,
+    z.array(jsonValueSchema),
+    z.record(z.string(), jsonValueSchema),
+  ]),
+);
+
 export const failureResponseSchema = z
   .object({
     success: z.literal(false),
     code: z.string().min(1),
     message: z.string().min(1),
-    details: z.unknown().optional(),
+    details: jsonValueSchema.optional(),
     timestamp: isoDatetimeStringSchema,
   })
   .strict();
@@ -79,7 +102,7 @@ export function ok<T>(data: T, timestamp: string): SuccessResponse<T> {
 export function fail(
   code: string,
   message: string,
-  details: unknown,
+  details: JsonValue | undefined,
   timestamp: string,
 ): FailureResponse {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
@@ -126,15 +149,20 @@ export const BusinessErrorHttpStatusMap: Record<
 export class BusinessException extends Error {
   readonly code: BusinessErrorCodeType;
   readonly status: BusinessHttpStatus;
-  readonly details?: unknown;
+  readonly details?: JsonValue | undefined;
 
   constructor(
     code: BusinessErrorCodeType,
     message: string,
-    details?: unknown,
+    details?: JsonValue,
     statusOverride?: BusinessHttpStatus,
   ) {
-    super(message);
+    const trimmed = message.trim();
+    const resolvedMessage =
+      trimmed.length > 0
+        ? trimmed
+        : `Business operation failed with code '${code}'`;
+    super(resolvedMessage);
     this.name = 'BusinessException';
     this.code = code;
     this.status = statusOverride ?? BusinessErrorHttpStatusMap[code];

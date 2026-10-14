@@ -65,6 +65,18 @@ describe('public bootstrap contract', () => {
   });
 });
 
+it('safeguards global error handler from unhandled business exception escaping', async () => {
+  const testApp = createServerApp().get('/test-business-error', () => {
+    throw new BusinessException(BusinessErrorCode.FORBIDDEN, '');
+  });
+  const response = await testApp.request('/test-business-error');
+  expect(response.status).toBe(403);
+  const body = failureResponseSchema.parse(await response.json());
+  expect(body.success).toBe(false);
+  expect(body.code).toBe('FORBIDDEN');
+  expect(body.message).toBe("Business operation failed with code 'FORBIDDEN'");
+});
+
 describe('engineering and data paradigms foundation', () => {
   it('builds standard unified response DTOs with validated explicit timestamps', () => {
     const validIso = '2026-10-14T10:00:00.000Z';
@@ -106,6 +118,24 @@ describe('engineering and data paradigms foundation', () => {
     expect(() => {
       fail('VALID_CODE', '', undefined, validIso);
     }).toThrow();
+
+    // Enforces details to be strictly JSON-serializable
+    expect(
+      fail('CODE', 'msg', { nested: { arr: [1, true, null, 'str'] } }, validIso)
+        .details,
+    ).toEqual({ nested: { arr: [1, true, null, 'str'] } });
+
+    expect(() => {
+      // BigInt is not JSON-serializable
+      const candidate: unknown = {
+        success: false,
+        code: 'CODE',
+        message: 'msg',
+        details: { count: 10n },
+        timestamp: validIso,
+      };
+      failureResponseSchema.parse(candidate);
+    }).toThrow();
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {
@@ -125,6 +155,18 @@ describe('engineering and data paradigms foundation', () => {
       details: { currentVersion: 2 },
       timestamp: '2026-10-14T10:00:00.000Z',
     });
+
+    // Validates that empty message is safely defaulted to avoid handler escaping
+    const emptyMsgEx = new BusinessException(
+      BusinessErrorCode.VALIDATION_FAILED,
+      '   ',
+    );
+    expect(emptyMsgEx.message).toBe(
+      "Business operation failed with code 'VALIDATION_FAILED'",
+    );
+    expect(emptyMsgEx.toResponse('2026-10-14T10:00:00.000Z').success).toBe(
+      false,
+    );
 
     // Verifies BusinessErrorCode is strictly scoped to the 4 generic REST error codes in bootstrap
     expect(Object.keys(BusinessErrorCode).sort()).toEqual([

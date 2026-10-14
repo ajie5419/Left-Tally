@@ -7,7 +7,20 @@ export function createServerApp(): Hono {
     .onError((err, context) => {
       const now = new Date().toISOString();
       if (err instanceof BusinessException) {
-        return context.json(err.toResponse(now), err.status);
+        try {
+          return context.json(err.toResponse(now), err.status);
+        } catch (handlerError) {
+          console.error('[BUSINESS_EXCEPTION_RESPONSE_FALLBACK]', handlerError);
+          return context.json(
+            fail(
+              err.code,
+              `Business operation failed with code '${err.code}'`,
+              undefined,
+              now,
+            ),
+            err.status,
+          );
+        }
       }
       console.error('[UNHANDLED_EXCEPTION]', err);
       return context.json(
