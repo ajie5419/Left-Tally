@@ -52,8 +52,21 @@ describe('public bootstrap contract', () => {
     const response = await app.request('/openapi.json');
     const body: unknown = await response.json();
     expect(body).toEqual(healthOpenApi);
-    expect((await app.request('/work-orders')).status).toBe(404);
-    expect((await app.request('/health', { method: 'POST' })).status).toBe(404);
+    const missingRouteRes = await app.request('/work-orders');
+    expect(missingRouteRes.status).toBe(404);
+    const missingRouteBody = failureResponseSchema.parse(
+      await missingRouteRes.json(),
+    );
+    expect(missingRouteBody.code).toBe('NOT_FOUND');
+    expect(missingRouteBody.message).toBe('Route not found');
+
+    const invalidMethodRes = await app.request('/health', { method: 'POST' });
+    expect(invalidMethodRes.status).toBe(404);
+    const invalidMethodBody = failureResponseSchema.parse(
+      await invalidMethodRes.json(),
+    );
+    expect(invalidMethodBody.code).toBe('NOT_FOUND');
+    expect(invalidMethodBody.message).toBe('Route not found');
   });
 });
 

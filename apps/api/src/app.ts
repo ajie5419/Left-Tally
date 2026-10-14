@@ -49,6 +49,13 @@ export class BusinessException extends Error {
 
 export function createServerApp(): Hono {
   return new Hono()
+    .notFound((context) => {
+      const now = new Date().toISOString();
+      return context.json(
+        fail('NOT_FOUND', 'Route not found', undefined, now),
+        404,
+      );
+    })
     .onError((err, context) => {
       const now = new Date().toISOString();
       if (err instanceof BusinessException) {
