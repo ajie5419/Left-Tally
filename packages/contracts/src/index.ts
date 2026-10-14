@@ -190,28 +190,16 @@ export function roundQuantity(
       `Non-finite quantity value encountered: ${String(value)}`,
     );
   }
-  const threshold = 0.5 / 10 ** decimals;
-  if (Math.abs(value) < threshold) {
-    return 0;
-  }
-  const fixed = value.toFixed(decimals + 8);
-  const parts = fixed.split('.');
-  const integerPart = parts[0] ?? '0';
-  const fractionalPart = parts[1] ?? '';
-  const isNegative = integerPart.startsWith('-');
-  const cleanInt = isNegative ? integerPart.slice(1) : integerPart;
-  const digitsToKeep = fractionalPart.slice(0, decimals);
-  const nextDigit = Number(fractionalPart[decimals] ?? '0');
+  const normalized = Number(value.toPrecision(12));
+  if (Math.abs(normalized) < 1e-12) return 0;
 
-  let rounded = BigInt(cleanInt + digitsToKeep);
-  if (nextDigit >= 5) {
-    rounded += 1n;
-  }
-  const str = rounded.toString().padStart(decimals + 1, '0');
-  const outInt = str.slice(0, str.length - decimals);
-  const outFrac = str.slice(str.length - decimals);
-  const sign = isNegative ? '-' : '';
-  return Number(`${sign}${outInt}.${outFrac}`);
+  const parts = normalized.toString().split('e');
+  const base = parts[0] ?? '0';
+  const exp = parts[1] !== undefined ? Number(parts[1]) : 0;
+  const shiftedExp = exp + decimals;
+  const shifted = Math.round(Number(`${base}e${String(shiftedExp)}`));
+  const res = Number(`${String(shifted)}e-${String(decimals)}`);
+  return Object.is(res, -0) ? 0 : res;
 }
 
 export function isEqualQuantity(
@@ -221,47 +209,4 @@ export function isEqualQuantity(
 ): boolean {
   if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
   return Math.abs(a - b) <= epsilon;
-}
-
-/**
- * 5. State Machine Transition Guard Paradigm
- */
-export type StateTransitionGraph<TState extends string> = Readonly<
-  Record<TState, readonly TState[]>
->;
-
-export class StateTransitionGuard<TState extends string> {
-  private readonly graph: StateTransitionGraph<TState>;
-
-  constructor(graph: StateTransitionGraph<TState>) {
-    this.graph = graph;
-  }
-
-  canTransition(current: TState, target: TState): boolean {
-    const targets = this.getTargets(current);
-    return targets.includes(target);
-  }
-
-  assertTransition(current: TState, target: TState, context?: unknown): void {
-    if (!this.canTransition(current, target)) {
-      const allowed = this.getTargets(current);
-      throw new BusinessException(
-        BusinessErrorCode.STATE_TRANSITION_INVALID,
-        `Invalid state transition: '${current}' -> '${target}'. Allowed targets: [${allowed.join(', ')}]`,
-        {
-          current,
-          target,
-          allowedTargets: allowed,
-          context,
-        },
-      );
-    }
-  }
-
-  private getTargets(state: TState): readonly TState[] {
-    if (Object.prototype.hasOwnProperty.call(this.graph, state)) {
-      return this.graph[state];
-    }
-    return [];
-  }
 }

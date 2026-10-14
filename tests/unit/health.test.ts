@@ -11,8 +11,6 @@ import {
   BusinessException,
   roundQuantity,
   isEqualQuantity,
-  StateTransitionGuard,
-  type StateTransitionGraph,
 } from '@gc/contracts';
 
 describe('public bootstrap contract', () => {
@@ -144,49 +142,19 @@ describe('engineering and data paradigms foundation', () => {
   });
 
   it('enforces general quantity precision, comparison, and rounding rules', () => {
-    expect(roundQuantity(12.34567)).toBe(12.3457);
-    expect(roundQuantity(12.3)).toBe(12.3);
+    expect(roundQuantity(0.00015 - 0.0001, 4)).toBe(0.0001);
+    expect(roundQuantity(0.00005, 4)).toBe(0.0001);
     expect(roundQuantity(10.07505, 4)).toBe(10.0751);
     expect(roundQuantity(1e-7, 4)).toBe(0);
     expect(roundQuantity(-1e-7, 4)).toBe(0);
     expect(roundQuantity(0.00004, 4)).toBe(0);
-    expect(roundQuantity(0.00005, 4)).toBe(0.0001);
+    expect(roundQuantity(12.34567, 4)).toBe(12.3457);
+    expect(roundQuantity(12.3)).toBe(12.3);
     expect(isEqualQuantity(10.0000001, 10.0)).toBe(true);
     expect(isEqualQuantity(10.01, 10.0)).toBe(false);
     expect(isEqualQuantity(0.3, 0.1 + 0.2)).toBe(true);
     expect(() => {
       roundQuantity(Number.NaN);
     }).toThrowError(/Non-finite quantity/);
-  });
-
-  it('guards state machine transitions against illegal jumps', () => {
-    type OrderState =
-      | 'DRAFT'
-      | 'DISPATCHED'
-      | 'IN_PROGRESS'
-      | 'COMPLETED'
-      | 'CANCELLED';
-
-    const graph: StateTransitionGraph<OrderState> = {
-      DRAFT: ['DISPATCHED', 'CANCELLED'],
-      DISPATCHED: ['IN_PROGRESS', 'CANCELLED'],
-      IN_PROGRESS: ['COMPLETED'],
-      COMPLETED: [],
-      CANCELLED: [],
-    };
-
-    const guard = new StateTransitionGuard(graph);
-
-    expect(guard.canTransition('DRAFT', 'DISPATCHED')).toBe(true);
-    expect(guard.canTransition('DRAFT', 'CANCELLED')).toBe(true);
-    expect(guard.canTransition('DRAFT', 'COMPLETED')).toBe(false);
-
-    expect(() => {
-      guard.assertTransition('DRAFT', 'DISPATCHED');
-    }).not.toThrow();
-
-    expect(() => {
-      guard.assertTransition('DRAFT', 'COMPLETED');
-    }).toThrowError(/Invalid state transition: 'DRAFT' -> 'COMPLETED'/);
   });
 });
