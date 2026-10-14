@@ -62,11 +62,13 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   ]),
 );
 
-export const successResponseSchema = (dataSchema: z.ZodType) =>
+export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z
     .object({
       success: z.literal(true),
-      data: z.pipe(dataSchema, jsonValueSchema),
+      data: dataSchema.check((ctx) => {
+        jsonValueSchema.parse(ctx.value);
+      }),
       timestamp: isoDatetimeStringSchema,
     })
     .strict();
@@ -108,16 +110,15 @@ function sanitizeJsonValue(value: unknown): unknown {
     return value.map((item: unknown) => sanitizeJsonValue(item));
   }
   if (typeof value === 'object') {
-    const record: Record<string, unknown> = {};
-    for (const [key, val] of Object.entries(value)) {
-      record[key] = sanitizeJsonValue(val);
-    }
+    const record = Object.fromEntries(
+      Object.entries(value).map(([key, val]) => [key, sanitizeJsonValue(val)]),
+    );
     return record;
   }
   throw new Error('Value is not a valid JSON structure');
 }
 
-export function ok<T extends JsonValue = JsonValue>(
+export function ok<T = unknown>(
   data: T,
   timestamp: string,
 ): SuccessResponse<T> {
@@ -127,7 +128,7 @@ export function ok<T extends JsonValue = JsonValue>(
     jsonValueSchema.parse(val);
     return true;
   });
-  const validData = schema.parse(jsonValueSchema.parse(sanitized));
+  const validData = schema.parse(sanitized);
   return {
     success: true,
     data: validData,

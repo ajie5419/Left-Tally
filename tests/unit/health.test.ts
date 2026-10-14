@@ -166,14 +166,33 @@ describe('engineering and data paradigms foundation', () => {
       bigintSchema.parse(candidate);
     }).toThrow();
 
-    // Enforces successResponseSchema to strip undeclared fields via endpoint data schema whitelist
-    const endpointSchema = successResponseSchema(z.object({ id: z.number() }));
-    const filteredResult = endpointSchema.parse({
+    // Enforces successResponseSchema preserves endpoint data type inference and strips undeclared fields
+    const endpointSchema = successResponseSchema(
+      z.object({ id: z.number(), name: z.string() }),
+    );
+    const candidateData: unknown = {
       success: true,
-      data: { id: 1, secret: 'classified' },
+      data: { id: 1, name: 'test', secret: 'leaked' },
       timestamp: validIso,
-    });
-    expect(filteredResult.data).toEqual({ id: 1 });
+    };
+    const parsedEndpoint = endpointSchema.parse(candidateData);
+    expect(parsedEndpoint.data.id).toBe(1);
+    expect(parsedEndpoint.data.name).toBe('test');
+    expect(
+      Object.prototype.hasOwnProperty.call(parsedEndpoint.data, 'secret'),
+    ).toBe(false);
+
+    // Enforces __proto__ as an own JSON key without prototype pollution
+    const parseJson = (raw: string): unknown => JSON.parse(raw);
+    const protoPayload = parseJson('{"__proto__":"kept","id":1}');
+    const protoResult = ok(protoPayload, validIso);
+    expect(
+      Object.prototype.hasOwnProperty.call(protoResult.data, '__proto__'),
+    ).toBe(true);
+    expect(JSON.stringify(protoResult)).toContain('"__proto__":"kept"');
+    expect(Object.prototype.hasOwnProperty.call(Object.prototype, 'kept')).toBe(
+      false,
+    );
 
     // Enforces ok() returns parsed clean object without non-enumerable toJSON hooks
     const payloadWithHook = { count: 42 };
