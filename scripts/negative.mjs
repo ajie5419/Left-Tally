@@ -42,11 +42,7 @@ function check(id, path, text, command, expected, pass = false) {
   if (command === lint) actual.push(path, '--max-warnings', '0');
   const run = spawnSync(actual[0], actual.slice(1), {
     cwd: temporary,
-    env: {
-      ...process.env,
-      GC_CHECKOUT_SCOPE: '',
-      GC_NEGATIVE_HARNESS: '1',
-    },
+    env: process.env,
     encoding: 'utf8',
     timeout: 120_000,
     maxBuffer: 5 * 1024 * 1024,
@@ -144,6 +140,7 @@ try {
     'package.json',
     'pnpm-workspace.yaml',
     'pnpm-lock.yaml',
+    '.gitignore',
     'tsconfig.json',
     'eslint.config.mjs',
     '.prettierrc.json',

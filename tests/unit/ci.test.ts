@@ -49,6 +49,27 @@ it('accepts complete isolated checker inputs for the versioned artifact scope', 
   expect(check('normal').status).toBe(0);
 });
 
+it('refuses legacy scope when untracked files are missing in local mode', () => {
+  const directory = fixture('normal');
+  // In local mode (empty GC_CHECKOUT_SCOPE), gate.mjs requires all 43 opening files.
+  // The isolated fixture only has versioned files, so it must fail with OLD_FILE_CHANGED.
+  const run = spawnSync(
+    process.execPath,
+    [
+      resolve('scripts/gate.mjs'),
+      '--results',
+      'evidence/bootstrap/verify/results.json',
+    ],
+    {
+      cwd: directory,
+      encoding: 'utf8',
+      env: { ...process.env, GC_CHECKOUT_SCOPE: '' },
+    },
+  );
+  expect(run.status).toBe(1);
+  expect(run.stdout).toContain('OLD_FILE_CHANGED');
+});
+
 for (const [scenario, diagnostic] of [
   ['failed-task', 'REQUIRED_RESULT_FAILED_OR_MISSING'],
   ['missing-task', 'REQUIRED_RESULT_FAILED_OR_MISSING'],

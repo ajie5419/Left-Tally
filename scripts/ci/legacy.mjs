@@ -4,11 +4,7 @@ import { sourceSnapshot } from './snapshot.mjs';
 /** Untracked user artifacts remain a local audit obligation, outside the clean CI checkout. */
 export function legacyScope(opening, baseline) {
   const scope = process.env.GC_CHECKOUT_SCOPE;
-  if (!scope) {
-    if (process.env.GC_NEGATIVE_HARNESS === '1')
-      return { paths: baseline, userArtifacts: 'negative harness testing' };
-    return { paths: opening, userArtifacts: 'audited locally' };
-  }
+  if (!scope) return { paths: opening, userArtifacts: 'audited locally' };
   if (scope !== 'versioned-engineering')
     throw new Error('CHECKOUT_SCOPE_UNKNOWN');
   for (const path of Object.keys(opening)) {
