@@ -67,7 +67,14 @@ export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
     .object({
       success: z.literal(true),
       data: dataSchema.check((ctx) => {
-        jsonValueSchema.parse(ctx.value);
+        const parsed = jsonValueSchema.safeParse(ctx.value);
+        if (!parsed.success) {
+          ctx.issues.push({
+            input: ctx.value,
+            code: 'custom',
+            message: parsed.error.message,
+          });
+        }
       }),
       timestamp: isoDatetimeStringSchema,
     })
@@ -93,6 +100,11 @@ export type FailureResponse = z.infer<typeof failureResponseSchema>;
 
 export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
 
+function isPlainObject(value: object): boolean {
+  const proto: unknown = Object.getPrototypeOf(value);
+  return proto === null || proto === Object.prototype;
+}
+
 function sanitizeJsonValue(value: unknown): unknown {
   if (value === null) {
     return null;
@@ -110,6 +122,11 @@ function sanitizeJsonValue(value: unknown): unknown {
     return value.map((item: unknown) => sanitizeJsonValue(item));
   }
   if (typeof value === 'object') {
+    if (!isPlainObject(value)) {
+      throw new Error(
+        'Non-plain objects (Date, RegExp, class instances) are not valid JSON structures',
+      );
+    }
     const record = Object.fromEntries(
       Object.entries(value).map(([key, val]) => [key, sanitizeJsonValue(val)]),
     );

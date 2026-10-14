@@ -166,6 +166,28 @@ describe('engineering and data paradigms foundation', () => {
       bigintSchema.parse(candidate);
     }).toThrow();
 
+    // Enforces safeParse on non-JSON schema returns success: false instead of escaping
+    const bigintSchema = successResponseSchema(z.bigint());
+    const candidateBigInt: unknown = {
+      success: true,
+      data: 10n,
+      timestamp: validIso,
+    };
+    const safeParsed = bigintSchema.safeParse(candidateBigInt);
+    expect(safeParsed.success).toBe(false);
+
+    // Enforces rejection of non-plain objects (Date, RegExp, class instances)
+    expect(() => {
+      ok(new Date(), validIso);
+    }).toThrow(/Non-plain objects/);
+
+    class CustomModel {
+      readonly field = 'custom';
+    }
+    expect(() => {
+      ok(new CustomModel(), validIso);
+    }).toThrow(/Non-plain objects/);
+
     // Enforces successResponseSchema preserves endpoint data type inference and strips undeclared fields
     const endpointSchema = successResponseSchema(
       z.object({ id: z.number(), name: z.string() }),
