@@ -62,20 +62,47 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   ]),
 );
 
+function cleanObjectHooks(val: object): unknown {
+  if (Array.isArray(val)) {
+    return val.map((item: unknown) => cleanValueHooks(item));
+  }
+  const record = Object.fromEntries(
+    Object.entries(val).map(([k, v]) => [k, cleanValueHooks(v)]),
+  );
+  return record;
+}
+
+function cleanValueHooks(val: unknown): unknown {
+  if (typeof val === 'object' && val !== null) {
+    return cleanObjectHooks(val);
+  }
+  return val;
+}
+
 export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z
     .object({
       success: z.literal(true),
-      data: dataSchema.check((ctx) => {
-        const parsed = jsonValueSchema.safeParse(ctx.value);
-        if (!parsed.success) {
-          ctx.issues.push({
-            input: ctx.value,
-            code: 'custom',
-            message: parsed.error.message,
-          });
-        }
-      }),
+      data: z
+        .preprocess((val) => {
+          if (typeof val === 'object' && val !== null) {
+            const proto: unknown = Object.getPrototypeOf(val);
+            if (proto === null || proto === Object.prototype) {
+              return cleanObjectHooks(val);
+            }
+          }
+          return val;
+        }, dataSchema)
+        .check((ctx) => {
+          const parsed = jsonValueSchema.safeParse(ctx.value);
+          if (!parsed.success) {
+            ctx.issues.push({
+              input: ctx.value,
+              code: 'custom',
+              message: parsed.error.message,
+            });
+          }
+        }),
       timestamp: isoDatetimeStringSchema,
     })
     .strict();

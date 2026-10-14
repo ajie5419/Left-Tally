@@ -230,6 +230,26 @@ describe('engineering and data paradigms foundation', () => {
         timestamp: validIso,
       }),
     );
+
+    // Enforces successResponseSchema with permissive schema strips non-enumerable toJSON hooks
+    const permissiveSchema = successResponseSchema(z.unknown());
+    const permissivePayload = { count: 42 };
+    Object.defineProperty(permissivePayload, 'toJSON', {
+      value: () => 10n,
+      enumerable: false,
+    });
+    const parsedPermissive = permissiveSchema.parse({
+      success: true,
+      data: permissivePayload,
+      timestamp: validIso,
+    });
+    expect(JSON.stringify(parsedPermissive)).toBe(
+      JSON.stringify({
+        success: true,
+        data: { count: 42 },
+        timestamp: validIso,
+      }),
+    );
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {
