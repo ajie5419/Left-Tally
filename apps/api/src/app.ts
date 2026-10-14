@@ -72,6 +72,38 @@ function handleBusinessException(
   }
 }
 
+function resolveHttpErrorCode(status: number): string {
+  if (status === 400) {
+    return 'VALIDATION_FAILED';
+  }
+  if (status === 403) {
+    return 'FORBIDDEN';
+  }
+  if (status === 404) {
+    return 'NOT_FOUND';
+  }
+  return status >= 500 ? 'INTERNAL_SERVER_ERROR' : `HTTP_${String(status)}`;
+}
+
+function extractExceptionHeaders(res: Response | undefined): Headers {
+  const headers = new Headers();
+  if (!res) {
+    return headers;
+  }
+  for (const [key, value] of res.headers) {
+    const lower = key.toLowerCase();
+    if (lower === 'content-type' || lower === 'content-length') {
+      continue;
+    }
+    if (lower === 'set-cookie') {
+      headers.append(key, value);
+    } else {
+      headers.set(key, value);
+    }
+  }
+  return headers;
+}
+
 function handleHttpException(
   err: HTTPException,
   context: Context,
@@ -88,33 +120,12 @@ function handleHttpException(
     : err.message.trim().length > 0
       ? err.message
       : `HTTP request failed with status ${String(status)}`;
-  const code =
-    status === 400
-      ? 'VALIDATION_FAILED'
-      : status === 403
-        ? 'FORBIDDEN'
-        : status === 404
-          ? 'NOT_FOUND'
-          : isServerError
-            ? 'INTERNAL_SERVER_ERROR'
-            : `HTTP_${String(status)}`;
-  const responseHeaders = new Headers();
-  context.res.headers.forEach((value, key) => {
-    responseHeaders.set(key, value);
-  });
-  if (err.res) {
-    err.res.headers.forEach((value, key) => {
-      const lower = key.toLowerCase();
-      if (lower !== 'content-type' && lower !== 'content-length') {
-        responseHeaders.set(key, value);
-      }
-    });
-  }
-  return context.json(
-    fail(code, message, undefined, now),
+  const code = resolveHttpErrorCode(status);
+  const responseHeaders = extractExceptionHeaders(err.res);
+  return context.json(fail(code, message, undefined, now), {
     status,
-    Object.fromEntries(responseHeaders.entries()),
-  );
+    headers: responseHeaders,
+  });
 }
 
 export function createServerApp(): Hono {

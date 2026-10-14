@@ -112,15 +112,15 @@ export function fail(
 /**
  * 3. Standard Business Exceptions & Error Codes Paradigm
  */
-export const BusinessErrorCode: {
+export const BusinessErrorCode: Readonly<{
   readonly VALIDATION_FAILED: 'VALIDATION_FAILED';
   readonly NOT_FOUND: 'NOT_FOUND';
   readonly FORBIDDEN: 'FORBIDDEN';
-} = {
+}> = Object.freeze({
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   NOT_FOUND: 'NOT_FOUND',
   FORBIDDEN: 'FORBIDDEN',
-};
+});
 
 export type BusinessErrorCodeType =
   (typeof BusinessErrorCode)[keyof typeof BusinessErrorCode];

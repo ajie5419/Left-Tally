@@ -455,6 +455,52 @@ describe('global error handling and HTTP status mapping', () => {
     expect(JSON.stringify(parsed)).not.toContain('mysql://');
     expect(JSON.stringify(parsed)).not.toContain('secret_pass');
   });
+
+  it('preserves multiple Set-Cookie headers, resolves header conflicts, and ensures JSON content header consistency', async () => {
+    const testApp = createServerApp().get('/test-cookie-headers', (c) => {
+      c.header('Set-Cookie', 'session=s1; Path=/', { append: true });
+      c.header('X-Request-Id', 'req-ctx-001');
+      c.header('X-Custom-Trace', 'trace-context');
+
+      const errHeaders = new Headers();
+      errHeaders.append('Set-Cookie', 'auth_token=jwt1; Secure; HttpOnly');
+      errHeaders.append('Set-Cookie', 'csrf_token=csrf2; SameSite=Strict');
+      errHeaders.set('X-Custom-Trace', 'trace-exception-override');
+      errHeaders.set('WWW-Authenticate', 'Bearer error="invalid_token"');
+      errHeaders.set('X-Content-Type-Options', 'nosniff');
+      errHeaders.set('Content-Type', 'text/html; charset=gbk');
+      errHeaders.set('Content-Length', '99999');
+
+      throw new HTTPException(401, {
+        res: new Response('<html>Error</html>', { headers: errHeaders }),
+      });
+    });
+
+    const response = await testApp.request('/test-cookie-headers');
+    expect(response.status).toBe(401);
+
+    const setCookies = response.headers.getSetCookie();
+    expect(setCookies).toEqual([
+      'session=s1; Path=/',
+      'auth_token=jwt1; Secure; HttpOnly',
+      'csrf_token=csrf2; SameSite=Strict',
+    ]);
+
+    expect(response.headers.get('x-request-id')).toBe('req-ctx-001');
+    expect(response.headers.get('x-custom-trace')).toBe(
+      'trace-exception-override',
+    );
+    expect(response.headers.get('www-authenticate')).toBe(
+      'Bearer error="invalid_token"',
+    );
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(response.headers.get('content-type')).toContain('application/json');
+    expect(response.headers.get('content-length')).not.toBe('99999');
+
+    const body = failureResponseSchema.parse(await response.json());
+    expect(body.success).toBe(false);
+    expect(body.code).toBe('HTTP_401');
+  });
 });
 
 describe('BusinessErrorCode enum', () => {
@@ -467,5 +513,17 @@ describe('BusinessErrorCode enum', () => {
     expect(BusinessErrorCode.FORBIDDEN).toBe('FORBIDDEN');
     expect(BusinessErrorCode.NOT_FOUND).toBe('NOT_FOUND');
     expect(BusinessErrorCode.VALIDATION_FAILED).toBe('VALIDATION_FAILED');
+    expect(Object.isFrozen(BusinessErrorCode)).toBe(true);
+    expect(Reflect.set(BusinessErrorCode, 'NOT_FOUND', 'TAMPERED')).toBe(false);
+
+    expect(() => {
+      Object.assign(BusinessErrorCode, { NOT_FOUND: 'TAMPERED' });
+    }).toThrow();
+    expect(() => {
+      Object.defineProperty(BusinessErrorCode, 'NOT_FOUND', {
+        value: 'TAMPERED',
+      });
+    }).toThrow();
+    expect(BusinessErrorCode.NOT_FOUND).toBe('NOT_FOUND');
   });
 });
