@@ -166,6 +166,15 @@ describe('engineering and data paradigms foundation', () => {
       bigintSchema.parse(candidate);
     }).toThrow();
 
+    // Enforces successResponseSchema to strip undeclared fields via endpoint data schema whitelist
+    const endpointSchema = successResponseSchema(z.object({ id: z.number() }));
+    const filteredResult = endpointSchema.parse({
+      success: true,
+      data: { id: 1, secret: 'classified' },
+      timestamp: validIso,
+    });
+    expect(filteredResult.data).toEqual({ id: 1 });
+
     // Enforces ok() returns parsed clean object without non-enumerable toJSON hooks
     const payloadWithHook = { count: 42 };
     Object.defineProperty(payloadWithHook, 'toJSON', {

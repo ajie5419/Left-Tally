@@ -62,11 +62,11 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   ]),
 );
 
-export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
+export const successResponseSchema = (dataSchema: z.ZodType) =>
   z
     .object({
       success: z.literal(true),
-      data: z.intersection(jsonValueSchema, dataSchema),
+      data: z.pipe(dataSchema, jsonValueSchema),
       timestamp: isoDatetimeStringSchema,
     })
     .strict();
