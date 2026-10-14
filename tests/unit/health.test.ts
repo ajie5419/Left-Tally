@@ -353,6 +353,62 @@ describe('engineering and data paradigms foundation', () => {
       ok(objWithHiddenMethod, validIso);
     }).toThrow(/non-enumerable properties/);
 
+    // Enforces rejection of symbol-keyed properties in plain objects
+    const symKey = Symbol('symField');
+    const objWithSymbol = { id: 1, [symKey]: 'secretValue' };
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: objWithSymbol,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(() => {
+      ok(objWithSymbol, validIso);
+    }).toThrow(/symbol keys/);
+
+    // Enforces rejection of enriched arrays (subclasses, extra properties, symbol keys)
+    const enrichedArray = Object.assign([1, 2], { unit: 'kg' });
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: enrichedArray,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(() => {
+      ok(enrichedArray, validIso);
+    }).toThrow(/non-index properties/);
+
+    const arrayWithSymbol = [1, 2];
+    Object.defineProperty(arrayWithSymbol, Symbol('meta'), {
+      value: 'metaValue',
+      enumerable: true,
+    });
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: arrayWithSymbol,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(() => {
+      ok(arrayWithSymbol, validIso);
+    }).toThrow(/symbol keys/);
+
+    class CustomArray extends Array {}
+    const customArrayInstance = CustomArray.from([1, 2]);
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: customArrayInstance,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(() => {
+      ok(customArrayInstance, validIso);
+    }).toThrow(/Array subclasses/);
+
     // Enforces array sanitization without trusting overridden map method
     const hijackedArray: unknown = [1, 10n];
     Object.defineProperty(hijackedArray, 'map', {

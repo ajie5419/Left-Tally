@@ -65,6 +65,10 @@ function assertPlainObjectProperties(value: object): void {
       'Non-plain objects (Date, RegExp, class instances) are not valid JSON structures',
     );
   }
+  const ownSymbols = Object.getOwnPropertySymbols(value);
+  if (ownSymbols.length > 0) {
+    throw new Error('Objects with symbol keys are not valid JSON structures');
+  }
   const ownPropertyNames = Object.getOwnPropertyNames(value);
   for (const prop of ownPropertyNames) {
     const desc = Object.getOwnPropertyDescriptor(value, prop);
@@ -76,7 +80,35 @@ function assertPlainObjectProperties(value: object): void {
   }
 }
 
+function assertStandardArray(value: unknown[]): void {
+  if (Object.getPrototypeOf(value) !== Array.prototype) {
+    throw new Error(
+      'Array subclasses or arrays with custom prototypes are not valid JSON structures',
+    );
+  }
+  const ownSymbols = Object.getOwnPropertySymbols(value);
+  if (ownSymbols.length > 0) {
+    throw new Error('Arrays with symbol keys are not valid JSON structures');
+  }
+  const ownPropertyNames = Object.getOwnPropertyNames(value);
+  for (const prop of ownPropertyNames) {
+    if (prop === 'length') continue;
+    if (!/^(0|[1-9]\d*)$/.test(prop)) {
+      throw new Error(
+        `Arrays with non-index properties are not valid JSON structures: '${prop}'`,
+      );
+    }
+    const desc = Object.getOwnPropertyDescriptor(value, prop);
+    if (desc !== undefined && !desc.enumerable) {
+      throw new Error(
+        `Arrays with non-enumerable properties are not valid JSON structures: '${prop}'`,
+      );
+    }
+  }
+}
+
 function sanitizeArray(value: unknown[]): unknown[] {
+  assertStandardArray(value);
   const list: unknown[] = [];
   for (let i = 0; i < value.length; i += 1) {
     if (!Object.prototype.hasOwnProperty.call(value, i)) {
