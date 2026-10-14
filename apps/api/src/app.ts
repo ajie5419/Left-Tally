@@ -85,6 +85,18 @@ function resolveHttpErrorCode(status: number): string {
   return status >= 500 ? 'INTERNAL_SERVER_ERROR' : `HTTP_${String(status)}`;
 }
 
+const DISCARDED_BODY_HEADER_NAMES: ReadonlySet<string> = new Set([
+  'content-type',
+  'content-length',
+  'content-encoding',
+  'content-range',
+  'content-location',
+  'content-language',
+  'content-digest',
+  'etag',
+  'last-modified',
+]);
+
 function extractExceptionHeaders(res: Response | undefined): Headers {
   const headers = new Headers();
   if (!res) {
@@ -92,7 +104,7 @@ function extractExceptionHeaders(res: Response | undefined): Headers {
   }
   for (const [key, value] of res.headers) {
     const lower = key.toLowerCase();
-    if (lower === 'content-type' || lower === 'content-length') {
+    if (DISCARDED_BODY_HEADER_NAMES.has(lower)) {
       continue;
     }
     if (lower === 'set-cookie') {

@@ -470,6 +470,9 @@ describe('global error handling and HTTP status mapping', () => {
       errHeaders.set('X-Content-Type-Options', 'nosniff');
       errHeaders.set('Content-Type', 'text/html; charset=gbk');
       errHeaders.set('Content-Length', '99999');
+      errHeaders.set('Content-Encoding', 'gzip');
+      errHeaders.set('Content-Range', 'bytes 0-100/200');
+      errHeaders.set('ETag', 'W/"stale-etag"');
 
       throw new HTTPException(401, {
         res: new Response('<html>Error</html>', { headers: errHeaders }),
@@ -496,6 +499,9 @@ describe('global error handling and HTTP status mapping', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(response.headers.get('content-type')).toContain('application/json');
     expect(response.headers.get('content-length')).not.toBe('99999');
+    expect(response.headers.get('content-encoding')).toBeNull();
+    expect(response.headers.get('content-range')).toBeNull();
+    expect(response.headers.get('etag')).toBeNull();
 
     const body = failureResponseSchema.parse(await response.json());
     expect(body.success).toBe(false);
