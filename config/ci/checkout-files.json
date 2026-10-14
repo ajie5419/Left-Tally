@@ -23,6 +23,7 @@
   "config/bootstrap.json",
   "config/ci/checkout-files.json",
   "config/ci/expected-negatives.json",
+  "config/ci/ruleset-main.json",
   "config/ci/tools.json",
   "config/compatibility.json",
   "config/database-probe.json",
