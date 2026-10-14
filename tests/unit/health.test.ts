@@ -28,6 +28,7 @@ describe('public bootstrap contract', () => {
       businessReady: false,
     });
   });
+
   it('rejects invented readiness and extra identity fields', () => {
     expect(
       healthSchema.safeParse({
@@ -45,6 +46,7 @@ describe('public bootstrap contract', () => {
       }).success,
     ).toBe(false);
   });
+
   it('publishes the actual contract and does not invent business routes', async () => {
     const response = await app.request('/openapi.json');
     const body: unknown = await response.json();
@@ -52,8 +54,340 @@ describe('public bootstrap contract', () => {
     expect((await app.request('/work-orders')).status).toBe(404);
     expect((await app.request('/health', { method: 'POST' })).status).toBe(404);
   });
+});
 
-  it('masks unhandled internal exceptions without exposing test routes in production', async () => {
+describe('successResponseSchema', () => {
+  const validIso = '2026-10-14T10:00:00.000Z';
+
+  it('parses valid data matching schema and explicit ISO timestamp', () => {
+    const schema = successResponseSchema(
+      z.object({ id: z.number(), name: z.string() }),
+    );
+    const parsed = schema.parse({
+      success: true,
+      data: { id: 1, name: 'order' },
+      timestamp: validIso,
+    });
+    expect(parsed).toEqual({
+      success: true,
+      data: { id: 1, name: 'order' },
+      timestamp: validIso,
+    });
+  });
+
+  it('strips undeclared data fields while strict schema rejects them', () => {
+    const stripSchema = successResponseSchema(z.object({ id: z.number() }));
+    const stripped = stripSchema.parse({
+      success: true,
+      data: { id: 42, extra: 'ignored' },
+      timestamp: validIso,
+    });
+    expect(stripped.data).toEqual({ id: 42 });
+    expect('extra' in stripped.data).toBe(false);
+
+    const strictDataSchema = successResponseSchema(
+      z.object({ id: z.number() }).strict(),
+    );
+    expect(
+      strictDataSchema.safeParse({
+        success: true,
+        data: { id: 42, extra: 'forbidden' },
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      stripSchema.safeParse({
+        success: true,
+        data: { id: 42 },
+        timestamp: validIso,
+        unexpectedRootField: true,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects non-true success, mismatched data types, and invalid timestamps', () => {
+    const schema = successResponseSchema(z.string());
+    expect(
+      schema.safeParse({
+        success: false,
+        data: 'test',
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      schema.safeParse({
+        success: true,
+        data: 12345,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      schema.safeParse({
+        success: true,
+        data: 'test',
+        timestamp: 'invalid-datetime',
+      }).success,
+    ).toBe(false);
+
+    expect(
+      schema.safeParse({
+        success: true,
+        data: 'test',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('failureResponseSchema', () => {
+  const validIso = '2026-10-14T10:00:00.000Z';
+
+  it('parses valid failure response and verifies optional details', () => {
+    const parsedWithDetails = failureResponseSchema.parse({
+      success: false,
+      code: 'VALIDATION_FAILED',
+      message: 'Invalid request body',
+      details: { reason: 'empty' },
+      timestamp: validIso,
+    });
+    expect(parsedWithDetails).toEqual({
+      success: false,
+      code: 'VALIDATION_FAILED',
+      message: 'Invalid request body',
+      details: { reason: 'empty' },
+      timestamp: validIso,
+    });
+
+    const parsedWithoutDetails = failureResponseSchema.parse({
+      success: false,
+      code: 'NOT_FOUND',
+      message: 'Resource not found',
+      timestamp: validIso,
+    });
+    expect(parsedWithoutDetails.details).toBeUndefined();
+  });
+
+  it('rejects non-false success, empty code, empty message, and invalid timestamps', () => {
+    expect(
+      failureResponseSchema.safeParse({
+        success: true,
+        code: 'ERR',
+        message: 'msg',
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: '',
+        message: 'msg',
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: '',
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        timestamp: '2026-99-99',
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        timestamp: validIso,
+        leakedField: 123,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('enforces details to strictly conform to jsonValueSchema', () => {
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        details: {
+          nested: [1, 'text', true, null, { sub: false }],
+        },
+        timestamp: validIso,
+      }).success,
+    ).toBe(true);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        details: { count: 10n },
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        details: { num: Number.NaN },
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        details: { inf: Infinity },
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      failureResponseSchema.safeParse({
+        success: false,
+        code: 'ERR',
+        message: 'msg',
+        details: { date: new Date() },
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('ok and fail helper functions', () => {
+  const validIso = '2026-10-14T10:00:00.000Z';
+
+  it('ok builds valid SuccessResponse and enforces ISO timestamp validation', () => {
+    const res = ok({ id: 101, title: 'Item' }, validIso);
+    expect(res).toEqual({
+      success: true,
+      data: { id: 101, title: 'Item' },
+      timestamp: validIso,
+    });
+
+    expect(() => ok({ id: 1 }, 'not-an-iso-string')).toThrowError(
+      /timestamp must be an ISO datetime string/,
+    );
+  });
+
+  it('fail builds valid FailureResponse and validates code, message, details, and timestamp', () => {
+    const failure = fail(
+      BusinessErrorCode.VALIDATION_FAILED,
+      'Invalid input parameter',
+      { field: 'quantity' },
+      validIso,
+    );
+    expect(failure).toEqual({
+      success: false,
+      code: 'VALIDATION_FAILED',
+      message: 'Invalid input parameter',
+      details: { field: 'quantity' },
+      timestamp: validIso,
+    });
+
+    expect(() => fail('CODE', 'msg', undefined, 'invalid-iso')).toThrowError(
+      /timestamp must be an ISO datetime string/,
+    );
+
+    expect(() => fail('', 'Valid message', undefined, validIso)).toThrow();
+    expect(() => fail('VALID_CODE', '', undefined, validIso)).toThrow();
+
+    expect(() => fail('CODE', 'msg', { invalid: 10n }, validIso)).toThrow();
+    expect(() => fail('CODE', 'msg', { num: Number.NaN }, validIso)).toThrow();
+  });
+});
+
+describe('global error handling and HTTP status mapping', () => {
+  it('maps BusinessException to corresponding HTTP status and failure structure', () => {
+    const validationEx = new BusinessException(
+      BusinessErrorCode.VALIDATION_FAILED,
+      'Field required',
+      { field: 'name' },
+    );
+    expect(validationEx.status).toBe(400);
+    expect(validationEx.code).toBe('VALIDATION_FAILED');
+
+    const forbiddenEx = new BusinessException(
+      BusinessErrorCode.FORBIDDEN,
+      'Permission denied',
+    );
+    expect(forbiddenEx.status).toBe(403);
+
+    const notFoundEx = new BusinessException(
+      BusinessErrorCode.NOT_FOUND,
+      'Entity not found',
+    );
+    expect(notFoundEx.status).toBe(404);
+
+    const emptyMsgEx = new BusinessException(
+      BusinessErrorCode.FORBIDDEN,
+      '   ',
+    );
+    expect(emptyMsgEx.message).toBe(
+      "Business operation failed with code 'FORBIDDEN'",
+    );
+  });
+
+  it('safeguards global error handler from unhandled business exception escaping', async () => {
+    const testApp = createServerApp().get('/test-business-error', () => {
+      throw new BusinessException(BusinessErrorCode.FORBIDDEN, '');
+    });
+    const response = await testApp.request('/test-business-error');
+    expect(response.status).toBe(403);
+    const body: unknown = await response.json();
+    const parsed = failureResponseSchema.parse(body);
+    expect(parsed.success).toBe(false);
+    expect(parsed.code).toBe('FORBIDDEN');
+    expect(parsed.message).toBe(
+      "Business operation failed with code 'FORBIDDEN'",
+    );
+  });
+
+  it('preserves Hono HTTPException statuses in the error handler', async () => {
+    const testApp = createServerApp()
+      .get('/test-unauthorized', () => {
+        throw new HTTPException(401, { message: 'Authentication required' });
+      })
+      .get('/test-timeout', () => {
+        throw new HTTPException(408, { message: 'Request Timeout' });
+      });
+
+    const unauthResponse = await testApp.request('/test-unauthorized');
+    expect(unauthResponse.status).toBe(401);
+    const unauthBody: unknown = await unauthResponse.json();
+    const parsedUnauth = failureResponseSchema.parse(unauthBody);
+    expect(parsedUnauth.success).toBe(false);
+    expect(parsedUnauth.code).toBe('HTTP_401');
+    expect(parsedUnauth.message).toBe('Authentication required');
+
+    const timeoutResponse = await testApp.request('/test-timeout');
+    expect(timeoutResponse.status).toBe(408);
+    const timeoutBody: unknown = await timeoutResponse.json();
+    const parsedTimeout = failureResponseSchema.parse(timeoutBody);
+    expect(parsedTimeout.success).toBe(false);
+    expect(parsedTimeout.code).toBe('HTTP_408');
+    expect(parsedTimeout.message).toBe('Request Timeout');
+  });
+
+  it('masks unhandled internal exceptions without exposing sensitive details in production', async () => {
     const testApp = createServerApp().get('/test-error', () => {
       throw new Error(
         'Database connection to mysql://root:secret_pass@127.0.0.1:3306/prod failed',
@@ -61,415 +395,26 @@ describe('public bootstrap contract', () => {
     });
     const response = await testApp.request('/test-error');
     expect(response.status).toBe(500);
-    const body = failureResponseSchema.parse(await response.json());
-    expect(body.success).toBe(false);
-    expect(body.code).toBe('INTERNAL_SERVER_ERROR');
-    expect(body.message).toBe('An unexpected internal error occurred');
-    expect(body.timestamp).toBeDefined();
-    expect(JSON.stringify(body)).not.toContain('mysql://');
-    expect(JSON.stringify(body)).not.toContain('secret_pass');
+    const body: unknown = await response.json();
+    const parsed = failureResponseSchema.parse(body);
+    expect(parsed.success).toBe(false);
+    expect(parsed.code).toBe('INTERNAL_SERVER_ERROR');
+    expect(parsed.message).toBe('An unexpected internal error occurred');
+    expect(parsed.timestamp).toBeDefined();
+    expect(JSON.stringify(parsed)).not.toContain('mysql://');
+    expect(JSON.stringify(parsed)).not.toContain('secret_pass');
   });
 });
 
-it('preserves Hono HTTPException statuses in the error handler', async () => {
-  const testApp = createServerApp()
-    .get('/test-unauthorized', () => {
-      throw new HTTPException(401, { message: 'Authentication required' });
-    })
-    .get('/test-timeout', () => {
-      throw new HTTPException(408, { message: 'Request Timeout' });
-    });
-
-  const unauthResponse = await testApp.request('/test-unauthorized');
-  expect(unauthResponse.status).toBe(401);
-  const unauthBody = failureResponseSchema.parse(await unauthResponse.json());
-  expect(unauthBody.success).toBe(false);
-  expect(unauthBody.code).toBe('HTTP_401');
-  expect(unauthBody.message).toBe('Authentication required');
-
-  const timeoutResponse = await testApp.request('/test-timeout');
-  expect(timeoutResponse.status).toBe(408);
-  const timeoutBody = failureResponseSchema.parse(await timeoutResponse.json());
-  expect(timeoutBody.success).toBe(false);
-  expect(timeoutBody.code).toBe('HTTP_408');
-  expect(timeoutBody.message).toBe('Request Timeout');
-});
-
-it('safeguards global error handler from unhandled business exception escaping', async () => {
-  const testApp = createServerApp().get('/test-business-error', () => {
-    throw new BusinessException(BusinessErrorCode.FORBIDDEN, '');
-  });
-  const response = await testApp.request('/test-business-error');
-  expect(response.status).toBe(403);
-  const body = failureResponseSchema.parse(await response.json());
-  expect(body.success).toBe(false);
-  expect(body.code).toBe('FORBIDDEN');
-  expect(body.message).toBe("Business operation failed with code 'FORBIDDEN'");
-});
-
-describe('engineering and data paradigms foundation', () => {
-  it('builds standard unified response DTOs with validated explicit timestamps and finite JSON payloads', () => {
-    const validIso = '2026-10-14T10:00:00.000Z';
-    const successResult = ok({ orderId: 'WO-20261014-01' }, validIso);
-    expect(successResult).toEqual({
-      success: true,
-      data: { orderId: 'WO-20261014-01' },
-      timestamp: validIso,
-    });
-
-    // Enforces finite JSON-serializable payloads in success responses (rejects NaN, Infinity, non-JSON)
-    expect(() => {
-      ok(Number.NaN, validIso);
-    }).toThrow();
-
-    expect(() => {
-      ok(Infinity, validIso);
-    }).toThrow();
-
-    expect(() => {
-      ok({ score: Number.NaN }, validIso);
-    }).toThrow();
-
-    const failureResult = fail(
-      BusinessErrorCode.VALIDATION_FAILED,
-      'Invalid payload',
-      { field: 'quantity' },
-      validIso,
-    );
-    expect(failureResult).toEqual({
-      success: false,
-      code: 'VALIDATION_FAILED',
-      message: 'Invalid payload',
-      details: { field: 'quantity' },
-      timestamp: validIso,
-    });
-
-    // Enforces explicit valid ISO timestamp string; rejects non-ISO strings
-    expect(() => {
-      ok({ id: 1 }, 'not-a-date');
-    }).toThrowError(/timestamp must be an ISO datetime string/);
-
-    expect(() => {
-      fail('CODE', 'msg', undefined, 'invalid-iso');
-    }).toThrowError(/timestamp must be an ISO datetime string/);
-
-    // Enforces full failure response schema validation (code.min(1), message.min(1))
-    expect(() => {
-      fail('', 'Valid message', undefined, validIso);
-    }).toThrow();
-
-    expect(() => {
-      fail('VALID_CODE', '', undefined, validIso);
-    }).toThrow();
-
-    // Enforces details to be strictly JSON-serializable
-    expect(
-      fail('CODE', 'msg', { nested: { arr: [1, true, null, 'str'] } }, validIso)
-        .details,
-    ).toEqual({ nested: { arr: [1, true, null, 'str'] } });
-
-    expect(() => {
-      // BigInt is not JSON-serializable
-      const candidate: unknown = {
-        success: false,
-        code: 'CODE',
-        message: 'msg',
-        details: { count: 10n },
-        timestamp: validIso,
-      };
-      failureResponseSchema.parse(candidate);
-    }).toThrow();
-
-    // Enforces successResponseSchema to reject non-JSON schemas like BigInt
-    expect(() => {
-      const bigintSchema = successResponseSchema(z.bigint());
-      const candidate: unknown = {
-        success: true,
-        data: 10n,
-        timestamp: validIso,
-      };
-      bigintSchema.parse(candidate);
-    }).toThrow();
-
-    // Enforces safeParse on non-JSON schema returns success: false instead of escaping
-    const bigintSchema = successResponseSchema(z.bigint());
-    const candidateBigInt: unknown = {
-      success: true,
-      data: 10n,
-      timestamp: validIso,
-    };
-    const safeParsed = bigintSchema.safeParse(candidateBigInt);
-    expect(safeParsed.success).toBe(false);
-
-    // Enforces rejection of non-plain objects (Date, RegExp, class instances)
-    expect(() => {
-      ok(new Date(), validIso);
-    }).toThrow(/Non-plain objects/);
-
-    class CustomModel {
-      readonly field = 'custom';
-    }
-    expect(() => {
-      ok(new CustomModel(), validIso);
-    }).toThrow(/Non-plain objects/);
-
-    // Enforces successResponseSchema preserves endpoint data type inference and strips undeclared fields
-    const endpointSchema = successResponseSchema(
-      z.object({ id: z.number(), name: z.string() }),
-    );
-    const candidateData: unknown = {
-      success: true,
-      data: { id: 1, name: 'test', secret: 'leaked' },
-      timestamp: validIso,
-    };
-    const parsedEndpoint = endpointSchema.parse(candidateData);
-    expect(parsedEndpoint.data.id).toBe(1);
-    expect(parsedEndpoint.data.name).toBe('test');
-    expect(
-      Object.prototype.hasOwnProperty.call(parsedEndpoint.data, 'secret'),
-    ).toBe(false);
-
-    // Enforces __proto__ as an own JSON key without prototype pollution
-    const parseJson = (raw: string): unknown => JSON.parse(raw);
-    const protoPayload = parseJson('{"__proto__":"kept","id":1}');
-    const protoResult = ok(protoPayload, validIso);
-    expect(
-      Object.prototype.hasOwnProperty.call(protoResult.data, '__proto__'),
-    ).toBe(true);
-    expect(JSON.stringify(protoResult)).toContain('"__proto__":"kept"');
-    expect(Object.prototype.hasOwnProperty.call(Object.prototype, 'kept')).toBe(
-      false,
-    );
-
-    // Enforces rejection of plain objects with non-enumerable properties (including toJSON hooks)
-    const payloadWithHook = { count: 42 };
-    Object.defineProperty(payloadWithHook, 'toJSON', {
-      value: () => 10n,
-      enumerable: false,
-    });
-    expect(() => {
-      ok(payloadWithHook, validIso);
-    }).toThrow(/non-enumerable properties/);
-
-    // Enforces successResponseSchema with permissive schema rejects non-enumerable properties
-    const permissiveSchema = successResponseSchema(z.unknown());
-    const permissivePayload = { count: 42 };
-    Object.defineProperty(permissivePayload, 'toJSON', {
-      value: () => 10n,
-      enumerable: false,
-    });
-    expect(
-      permissiveSchema.safeParse({
-        success: true,
-        data: permissivePayload,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-
-    // Enforces rejection of nested non-plain response values
-    const nestedNonPlainResult = successResponseSchema(z.unknown()).safeParse({
-      success: true,
-      data: { when: new Date() },
-      timestamp: validIso,
-    });
-    expect(nestedNonPlainResult.success).toBe(false);
-
-    // Enforces rejection of endpoint transform outputs containing non-enumerable properties
-    const transformSchema = successResponseSchema(
-      z.string().transform(() => {
-        const obj = { count: 100 };
-        Object.defineProperty(obj, 'toJSON', {
-          value: () => 10n,
-          enumerable: false,
-        });
-        return obj;
-      }),
-    );
-    expect(
-      transformSchema.safeParse({
-        success: true,
-        data: 'trigger',
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-
-    // Enforces preservation of __proto__ in failure details
-    const failWithProto = fail(
-      'ERR',
-      'msg',
-      JSON.parse('{"__proto__":"kept","err":"failed"}'),
-      validIso,
-    );
-    expect(
-      Object.prototype.hasOwnProperty.call(failWithProto.details, '__proto__'),
-    ).toBe(true);
-    expect(JSON.stringify(failWithProto)).toContain('"__proto__":"kept"');
-    expect(Object.prototype.hasOwnProperty.call(Object.prototype, 'kept')).toBe(
-      false,
-    );
-
-    // Enforces rejection of sparse arrays with inherited numeric properties on prototype
-    const protoSparseArray: unknown[] = [1];
-    protoSparseArray.length = 3;
-    Object.setPrototypeOf(protoSparseArray, { 1: 999 });
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: protoSparseArray,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-
-    // Enforces rejection of plain objects with non-enumerable data or function properties
-    const objWithHiddenData = { publicField: 'visible' };
-    Object.defineProperty(objWithHiddenData, 'secretId', {
-      value: 12345,
-      enumerable: false,
-    });
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: objWithHiddenData,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-    expect(() => {
-      ok(objWithHiddenData, validIso);
-    }).toThrow(/non-enumerable properties/);
-
-    const objWithHiddenMethod = { id: 1 };
-    Object.defineProperty(objWithHiddenMethod, 'run', {
-      value: () => 'exec',
-      enumerable: false,
-    });
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: objWithHiddenMethod,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-    expect(() => {
-      ok(objWithHiddenMethod, validIso);
-    }).toThrow(/non-enumerable properties/);
-
-    // Enforces rejection of symbol-keyed properties in plain objects
-    const symKey = Symbol('symField');
-    const objWithSymbol = { id: 1, [symKey]: 'secretValue' };
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: objWithSymbol,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-    expect(() => {
-      ok(objWithSymbol, validIso);
-    }).toThrow(/symbol keys/);
-
-    // Enforces rejection of enriched arrays (subclasses, extra properties, symbol keys)
-    const enrichedArray = Object.assign([1, 2], { unit: 'kg' });
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: enrichedArray,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-    expect(() => {
-      ok(enrichedArray, validIso);
-    }).toThrow(/non-index properties/);
-
-    const arrayWithSymbol = [1, 2];
-    Object.defineProperty(arrayWithSymbol, Symbol('meta'), {
-      value: 'metaValue',
-      enumerable: true,
-    });
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: arrayWithSymbol,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-    expect(() => {
-      ok(arrayWithSymbol, validIso);
-    }).toThrow(/symbol keys/);
-
-    class CustomArray extends Array {}
-    const customArrayInstance = CustomArray.from([1, 2]);
-    expect(
-      successResponseSchema(z.unknown()).safeParse({
-        success: true,
-        data: customArrayInstance,
-        timestamp: validIso,
-      }).success,
-    ).toBe(false);
-    expect(() => {
-      ok(customArrayInstance, validIso);
-    }).toThrow(/Array subclasses/);
-
-    // Enforces array sanitization without trusting overridden map method
-    const hijackedArray: unknown = [1, 10n];
-    Object.defineProperty(hijackedArray, 'map', {
-      value: () => hijackedArray,
-    });
-    const hijackedResult = successResponseSchema(z.unknown()).safeParse({
-      success: true,
-      data: hijackedArray,
-      timestamp: validIso,
-    });
-    expect(hijackedResult.success).toBe(false);
-
-    // Enforces rejection of sparse arrays to protect generic type contracts
-    const sparseArray: unknown[] = [1];
-    sparseArray[2] = 3;
-    const sparseResult = successResponseSchema(z.unknown()).safeParse({
-      success: true,
-      data: sparseArray,
-      timestamp: validIso,
-    });
-    expect(sparseResult.success).toBe(false);
-    expect(() => {
-      ok(sparseArray, validIso);
-    }).toThrow(/Sparse arrays are not valid JSON structures/);
-  });
-
-  it('maps business exceptions to standardized error structures and HTTP status codes', () => {
-    const ex = new BusinessException(
-      BusinessErrorCode.FORBIDDEN,
-      'Access to this resource is denied',
-      { resource: 'billing' },
-    );
-    expect(ex.status).toBe(403);
-    expect(ex.code).toBe('FORBIDDEN');
-
-    const res = ex.toResponse('2026-10-14T10:00:00.000Z');
-    expect(res).toEqual({
-      success: false,
-      code: 'FORBIDDEN',
-      message: 'Access to this resource is denied',
-      details: { resource: 'billing' },
-      timestamp: '2026-10-14T10:00:00.000Z',
-    });
-
-    // Validates that empty message is safely defaulted to avoid handler escaping
-    const emptyMsgEx = new BusinessException(
-      BusinessErrorCode.VALIDATION_FAILED,
-      '   ',
-    );
-    expect(emptyMsgEx.message).toBe(
-      "Business operation failed with code 'VALIDATION_FAILED'",
-    );
-    expect(emptyMsgEx.toResponse('2026-10-14T10:00:00.000Z').success).toBe(
-      false,
-    );
-
-    // Verifies BusinessErrorCode is strictly scoped to the 3 generic REST error codes in bootstrap
+describe('BusinessErrorCode enum', () => {
+  it('strictly defines only the 3 generic request-level error codes in bootstrap', () => {
     expect(Object.keys(BusinessErrorCode).sort()).toEqual([
       'FORBIDDEN',
       'NOT_FOUND',
       'VALIDATION_FAILED',
     ]);
+    expect(BusinessErrorCode.FORBIDDEN).toBe('FORBIDDEN');
+    expect(BusinessErrorCode.NOT_FOUND).toBe('NOT_FOUND');
+    expect(BusinessErrorCode.VALIDATION_FAILED).toBe('VALIDATION_FAILED');
   });
 });

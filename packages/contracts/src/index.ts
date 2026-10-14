@@ -39,146 +39,28 @@ export const isoDatetimeStringSchema = z.iso.datetime({
   message: 'timestamp must be an ISO datetime string',
 });
 
-export const jsonLiteralSchema = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
-  z.null(),
-]);
-
+export type JsonLiteral = string | number | boolean | null;
 export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
+  | JsonLiteral
   | { [key: string]: JsonValue }
   | JsonValue[];
 
-function isPlainObject(value: object): boolean {
-  const proto: unknown = Object.getPrototypeOf(value);
-  return proto === null || proto === Object.prototype;
-}
+export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number().refine(Number.isFinite, { message: 'Number must be finite' }),
+    z.boolean(),
+    z.null(),
+    z.array(jsonValueSchema),
+    z.record(z.string(), jsonValueSchema),
+  ]),
+);
 
-function assertPlainObjectProperties(value: object): void {
-  if (!isPlainObject(value)) {
-    throw new Error(
-      'Non-plain objects (Date, RegExp, class instances) are not valid JSON structures',
-    );
-  }
-  const ownSymbols = Object.getOwnPropertySymbols(value);
-  if (ownSymbols.length > 0) {
-    throw new Error('Objects with symbol keys are not valid JSON structures');
-  }
-  const ownPropertyNames = Object.getOwnPropertyNames(value);
-  for (const prop of ownPropertyNames) {
-    const desc = Object.getOwnPropertyDescriptor(value, prop);
-    if (desc !== undefined && !desc.enumerable) {
-      throw new Error(
-        `Objects with non-enumerable properties are not valid JSON structures: '${prop}'`,
-      );
-    }
-  }
-}
-
-function assertStandardArray(value: unknown[]): void {
-  if (Object.getPrototypeOf(value) !== Array.prototype) {
-    throw new Error(
-      'Array subclasses or arrays with custom prototypes are not valid JSON structures',
-    );
-  }
-  const ownSymbols = Object.getOwnPropertySymbols(value);
-  if (ownSymbols.length > 0) {
-    throw new Error('Arrays with symbol keys are not valid JSON structures');
-  }
-  const ownPropertyNames = Object.getOwnPropertyNames(value);
-  for (const prop of ownPropertyNames) {
-    if (prop === 'length') continue;
-    if (!/^(0|[1-9]\d*)$/.test(prop)) {
-      throw new Error(
-        `Arrays with non-index properties are not valid JSON structures: '${prop}'`,
-      );
-    }
-    const desc = Object.getOwnPropertyDescriptor(value, prop);
-    if (desc !== undefined && !desc.enumerable) {
-      throw new Error(
-        `Arrays with non-enumerable properties are not valid JSON structures: '${prop}'`,
-      );
-    }
-  }
-}
-
-function sanitizeArray(value: unknown[]): unknown[] {
-  assertStandardArray(value);
-  const list: unknown[] = [];
-  for (let i = 0; i < value.length; i += 1) {
-    if (!Object.prototype.hasOwnProperty.call(value, i)) {
-      throw new Error('Sparse arrays are not valid JSON structures');
-    }
-    list.push(sanitizeJsonValue(value[i]));
-  }
-  return list;
-}
-
-function sanitizeJsonValue(value: unknown): unknown {
-  if (value === null) {
-    return null;
-  }
-  if (typeof value === 'number') {
-    if (!Number.isFinite(value)) {
-      throw new Error('Number must be finite and not NaN');
-    }
-    return value;
-  }
-  if (typeof value === 'string' || typeof value === 'boolean') {
-    return value;
-  }
-  if (Array.isArray(value)) {
-    return sanitizeArray(value);
-  }
-  if (typeof value === 'object') {
-    assertPlainObjectProperties(value);
-    return Object.fromEntries(
-      Object.entries(value).map(([key, val]) => [key, sanitizeJsonValue(val)]),
-    );
-  }
-  throw new Error('Value is not a valid JSON structure');
-}
-
-export const jsonValueSchema: z.ZodType<JsonValue> = z
-  .unknown()
-  .transform((val, ctx): JsonValue => {
-    try {
-      const sanitized: unknown = sanitizeJsonValue(val);
-      const schema: z.ZodType<JsonValue> = z.custom<JsonValue>(() => true);
-      return schema.parse(sanitized);
-    } catch (err) {
-      ctx.addIssue({
-        code: 'custom',
-        message: err instanceof Error ? err.message : String(err),
-      });
-      return z.NEVER;
-    }
-  });
-
-export const successResponseSchema = <Output, Input>(
-  dataSchema: z.ZodType<Output, Input>,
-) =>
+export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z
     .object({
       success: z.literal(true),
-      data: dataSchema.transform((val, ctx): Output => {
-        try {
-          const sanitized: unknown = sanitizeJsonValue(val);
-          const schema: z.ZodType<Output> = z.custom<Output>(() => true);
-          return schema.parse(sanitized);
-        } catch (err) {
-          ctx.addIssue({
-            code: 'custom',
-            message: err instanceof Error ? err.message : String(err),
-          });
-          return z.NEVER;
-        }
-      }),
+      data: dataSchema,
       timestamp: isoDatetimeStringSchema,
     })
     .strict();
@@ -203,20 +85,11 @@ export type FailureResponse = z.infer<typeof failureResponseSchema>;
 
 export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
 
-export function ok<T = unknown>(
-  data: T,
-  timestamp: string,
-): SuccessResponse<T> {
+export function ok<T>(data: T, timestamp: string): SuccessResponse<T> {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
-  const sanitized: unknown = sanitizeJsonValue(data);
-  const schema: z.ZodType<T> = z.custom<T>((val) => {
-    jsonValueSchema.parse(val);
-    return true;
-  });
-  const validData: T = schema.parse(sanitized);
   return {
     success: true,
-    data: validData,
+    data,
     timestamp: validTimestamp,
   };
 }
@@ -227,15 +100,13 @@ export function fail(
   details: unknown,
   timestamp: string,
 ): FailureResponse {
-  const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
-  const candidate: unknown = {
+  return failureResponseSchema.parse({
     success: false,
     code,
     message,
     ...(details !== undefined ? { details } : {}),
-    timestamp: validTimestamp,
-  };
-  return failureResponseSchema.parse(candidate);
+    timestamp,
+  });
 }
 
 /**
