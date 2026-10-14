@@ -7,6 +7,7 @@
   "Grand Comptroller/工程治理与门禁基线-2026-10-13.md",
   "apps/api/package.json",
   "apps/api/src/app.ts",
+  "apps/api/src/domain/workshop.ts",
   "apps/api/src/routes/health.ts",
   "apps/api/tsconfig.build.json",
   "apps/web/index.html",

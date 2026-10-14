@@ -1,16 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { app } from '../../apps/api/src/app';
+import { assertWorkshopQuantityConservation } from '../../apps/api/src/domain/workshop';
 import {
   healthSchema,
   healthOpenApi,
   entityAuditBaseSchema,
+  failureResponseSchema,
   ok,
   fail,
   BusinessErrorCode,
   BusinessException,
   roundQuantity,
   isEqualQuantity,
-  assertWorkshopQuantityConservation,
   StateTransitionGuard,
   type StateTransitionGraph,
 } from '@gc/contracts';
@@ -50,6 +51,17 @@ describe('public bootstrap contract', () => {
     expect(body).toEqual(healthOpenApi);
     expect((await app.request('/work-orders')).status).toBe(404);
     expect((await app.request('/health', { method: 'POST' })).status).toBe(404);
+  });
+
+  it('masks unhandled internal exceptions to prevent leaking sensitive details', async () => {
+    const response = await app.request('/test-error');
+    expect(response.status).toBe(500);
+    const body = failureResponseSchema.parse(await response.json());
+    expect(body.success).toBe(false);
+    expect(body.code).toBe('INTERNAL_SERVER_ERROR');
+    expect(body.message).toBe('An unexpected internal error occurred');
+    expect(JSON.stringify(body)).not.toContain('mysql://');
+    expect(JSON.stringify(body)).not.toContain('secret_pass');
   });
 });
 
@@ -130,6 +142,7 @@ describe('engineering and data paradigms foundation', () => {
   it('enforces workshop quantity precision and conservation theorem', () => {
     expect(roundQuantity(12.34567)).toBe(12.3457);
     expect(roundQuantity(12.3)).toBe(12.3);
+    expect(roundQuantity(10.07505, 4)).toBe(10.0751);
     expect(isEqualQuantity(10.0000001, 10.0)).toBe(true);
     expect(isEqualQuantity(10.01, 10.0)).toBe(false);
 
