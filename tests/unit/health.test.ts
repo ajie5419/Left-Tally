@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { app, createServerApp } from '../../apps/api/src/app';
+import {
+  app,
+  createServerApp,
+  BusinessException,
+} from '../../apps/api/src/app';
 import {
   healthSchema,
   healthOpenApi,
@@ -7,7 +11,6 @@ import {
   ok,
   fail,
   BusinessErrorCode,
-  BusinessException,
 } from '@gc/contracts';
 
 describe('public bootstrap contract', () => {
@@ -78,7 +81,7 @@ it('safeguards global error handler from unhandled business exception escaping',
 });
 
 describe('engineering and data paradigms foundation', () => {
-  it('builds standard unified response DTOs with validated explicit timestamps', () => {
+  it('builds standard unified response DTOs with validated explicit timestamps and finite JSON payloads', () => {
     const validIso = '2026-10-14T10:00:00.000Z';
     const successResult = ok({ orderId: 'WO-20261014-01' }, validIso);
     expect(successResult).toEqual({
@@ -86,6 +89,19 @@ describe('engineering and data paradigms foundation', () => {
       data: { orderId: 'WO-20261014-01' },
       timestamp: validIso,
     });
+
+    // Enforces finite JSON-serializable payloads in success responses (rejects NaN, Infinity, non-JSON)
+    expect(() => {
+      ok(Number.NaN, validIso);
+    }).toThrow();
+
+    expect(() => {
+      ok(Infinity, validIso);
+    }).toThrow();
+
+    expect(() => {
+      ok({ score: Number.NaN }, validIso);
+    }).toThrow();
 
     const failureResult = fail(
       BusinessErrorCode.VALIDATION_FAILED,
