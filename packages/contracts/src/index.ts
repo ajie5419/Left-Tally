@@ -32,29 +32,6 @@ export const healthOpenApi = {
 };
 
 /**
- * 1. Entity Audit Base Paradigm
- * Baseline schema and types for business entities with optimistic locking.
- */
-export const entityAuditBaseSchema = z
-  .object({
-    id: z.string().min(1, 'Entity id cannot be empty'),
-    createdAt: z.iso.datetime({
-      message: 'createdAt must be an ISO datetime string',
-    }),
-    updatedAt: z.iso.datetime({
-      message: 'updatedAt must be an ISO datetime string',
-    }),
-    createdBy: z.string().min(1, 'createdBy cannot be empty'),
-    version: z
-      .number()
-      .int()
-      .positive({ message: 'version must be a positive integer' }),
-  })
-  .strict();
-
-export type EntityAuditBase = z.infer<typeof entityAuditBaseSchema>;
-
-/**
  * 2. Unified Result & Response DTO Paradigm
  */
 export const isoDatetimeStringSchema = z.iso.datetime({
@@ -106,13 +83,14 @@ export function fail(
   timestamp: string,
 ): FailureResponse {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
-  return {
+  const candidate: unknown = {
     success: false,
     code,
     message,
     ...(details !== undefined ? { details } : {}),
     timestamp: validTimestamp,
   };
+  return failureResponseSchema.parse(candidate);
 }
 
 /**

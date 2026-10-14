@@ -3,7 +3,6 @@ import { app, createServerApp } from '../../apps/api/src/app';
 import {
   healthSchema,
   healthOpenApi,
-  entityAuditBaseSchema,
   failureResponseSchema,
   ok,
   fail,
@@ -67,34 +66,6 @@ describe('public bootstrap contract', () => {
 });
 
 describe('engineering and data paradigms foundation', () => {
-  it('validates entity audit base schema and optimistic locking constraints', () => {
-    const validEntity = {
-      id: 'ent_1001',
-      createdAt: '2026-10-14T08:00:00.000Z',
-      updatedAt: '2026-10-14T08:30:00.000Z',
-      createdBy: 'operator_01',
-      version: 1,
-    };
-    expect(entityAuditBaseSchema.safeParse(validEntity).success).toBe(true);
-
-    expect(
-      entityAuditBaseSchema.safeParse({
-        ...validEntity,
-        createdAt: 'invalid-date',
-      }).success,
-    ).toBe(false);
-    expect(
-      entityAuditBaseSchema.safeParse({ ...validEntity, createdBy: '' })
-        .success,
-    ).toBe(false);
-    expect(
-      entityAuditBaseSchema.safeParse({ ...validEntity, version: 0 }).success,
-    ).toBe(false);
-    expect(
-      entityAuditBaseSchema.safeParse({ ...validEntity, version: -1 }).success,
-    ).toBe(false);
-  });
-
   it('builds standard unified response DTOs with validated explicit timestamps', () => {
     const validIso = '2026-10-14T10:00:00.000Z';
     const successResult = ok({ orderId: 'WO-20261014-01' }, validIso);
@@ -126,6 +97,15 @@ describe('engineering and data paradigms foundation', () => {
     expect(() => {
       fail('CODE', 'msg', undefined, 'invalid-iso');
     }).toThrowError(/timestamp must be an ISO datetime string/);
+
+    // Enforces full failure response schema validation (code.min(1), message.min(1))
+    expect(() => {
+      fail('', 'Valid message', undefined, validIso);
+    }).toThrow();
+
+    expect(() => {
+      fail('VALID_CODE', '', undefined, validIso);
+    }).toThrow();
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {
