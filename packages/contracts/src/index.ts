@@ -59,6 +59,38 @@ function isPlainObject(value: object): boolean {
   return proto === null || proto === Object.prototype;
 }
 
+function assertPlainObjectProperties(value: object): void {
+  if (!isPlainObject(value)) {
+    throw new Error(
+      'Non-plain objects (Date, RegExp, class instances) are not valid JSON structures',
+    );
+  }
+  const ownPropertyNames = Object.getOwnPropertyNames(value);
+  for (const prop of ownPropertyNames) {
+    const desc = Object.getOwnPropertyDescriptor(value, prop);
+    const isNonEnumerableData =
+      desc !== undefined &&
+      !desc.enumerable &&
+      typeof desc.value !== 'function';
+    if (isNonEnumerableData) {
+      throw new Error(
+        `Objects with non-enumerable data properties are not valid JSON structures: '${prop}'`,
+      );
+    }
+  }
+}
+
+function sanitizeArray(value: unknown[]): unknown[] {
+  const list: unknown[] = [];
+  for (let i = 0; i < value.length; i += 1) {
+    if (!Object.prototype.hasOwnProperty.call(value, i)) {
+      throw new Error('Sparse arrays are not valid JSON structures');
+    }
+    list.push(sanitizeJsonValue(value[i]));
+  }
+  return list;
+}
+
 function sanitizeJsonValue(value: unknown): unknown {
   if (value === null) {
     return null;
@@ -73,25 +105,13 @@ function sanitizeJsonValue(value: unknown): unknown {
     return value;
   }
   if (Array.isArray(value)) {
-    const list: unknown[] = [];
-    for (let i = 0; i < value.length; i += 1) {
-      if (!(i in value)) {
-        throw new Error('Sparse arrays are not valid JSON structures');
-      }
-      list.push(sanitizeJsonValue(value[i]));
-    }
-    return list;
+    return sanitizeArray(value);
   }
   if (typeof value === 'object') {
-    if (!isPlainObject(value)) {
-      throw new Error(
-        'Non-plain objects (Date, RegExp, class instances) are not valid JSON structures',
-      );
-    }
-    const record = Object.fromEntries(
+    assertPlainObjectProperties(value);
+    return Object.fromEntries(
       Object.entries(value).map(([key, val]) => [key, sanitizeJsonValue(val)]),
     );
-    return record;
   }
   throw new Error('Value is not a valid JSON structure');
 }

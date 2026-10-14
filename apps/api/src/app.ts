@@ -87,7 +87,8 @@ export function createServerApp(): Hono {
                 : `HTTP_${statusText}`;
         return context.json(fail(code, message, undefined, now), err.status);
       }
-      console.error('[UNHANDLED_EXCEPTION]', err);
+      const errorName = err instanceof Error ? err.name : 'UnknownError';
+      console.error(`[UNHANDLED_EXCEPTION] ${errorName}`);
       return context.json(
         fail(
           'INTERNAL_SERVER_ERROR',

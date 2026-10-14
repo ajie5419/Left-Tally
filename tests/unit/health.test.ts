@@ -323,6 +323,35 @@ describe('engineering and data paradigms foundation', () => {
       false,
     );
 
+    // Enforces rejection of sparse arrays with inherited numeric properties on prototype
+    const protoSparseArray: unknown[] = [1];
+    protoSparseArray.length = 3;
+    Object.setPrototypeOf(protoSparseArray, { 1: 999 });
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: protoSparseArray,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+
+    // Enforces rejection of plain objects with non-enumerable data properties
+    const objWithHiddenData = { publicField: 'visible' };
+    Object.defineProperty(objWithHiddenData, 'secretId', {
+      value: 12345,
+      enumerable: false,
+    });
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: objWithHiddenData,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(() => {
+      ok(objWithHiddenData, validIso);
+    }).toThrow(/non-enumerable data properties/);
+
     // Enforces array sanitization without trusting overridden map method
     const hijackedArray: unknown = [1, 10n];
     Object.defineProperty(hijackedArray, 'map', {
