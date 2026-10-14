@@ -10,6 +10,8 @@ import {
   BusinessErrorCode,
   BusinessException,
   roundQuantity,
+  addQuantity,
+  subtractQuantity,
   isEqualQuantity,
 } from '@gc/contracts';
 
@@ -142,6 +144,9 @@ describe('engineering and data paradigms foundation', () => {
   });
 
   it('enforces general quantity precision, comparison, and rounding rules', () => {
+    expect(roundQuantity(0.145 - 0.14, 2)).toBe(0.01);
+    expect(subtractQuantity(0.145, 0.14, 2)).toBe(0.01);
+    expect(addQuantity(0.14, 0.005, 2)).toBe(0.15);
     expect(roundQuantity(123456789.12346, 4)).toBe(123456789.1235);
     expect(roundQuantity(123456789.12344, 4)).toBe(123456789.1234);
     expect(roundQuantity(123456789.12345, 4)).toBe(123456789.1235);

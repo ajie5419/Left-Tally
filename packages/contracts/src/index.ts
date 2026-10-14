@@ -198,14 +198,39 @@ export function roundQuantity(
   const base = parts[0] ?? '0';
   const exp = parts[1] !== undefined ? Number(parts[1]) : 0;
   const shiftedExp = exp + decimals;
-  const shifted = Number(`${base}e${String(shiftedExp)}`);
-  const rounded = Math.round(shifted + Number.EPSILON);
+  let shifted = Number(`${base}e${String(shiftedExp)}`);
+
+  // Snap artifacts near half boundary (.5) caused by multi-ULP floating point drifts (e.g. 0.4999999999999977 -> 0.5)
+  const floor = Math.floor(shifted);
+  const half = floor + 0.5;
+  const tolerance = Math.max(1e-10, Math.abs(shifted) * (Number.EPSILON * 64));
+  if (Math.abs(shifted - half) < tolerance) {
+    shifted = half;
+  }
+
+  const rounded = Math.round(shifted);
   const resParts = rounded.toString().split('e');
   const resBase = resParts[0] ?? '0';
   const resExp =
     (resParts[1] !== undefined ? Number(resParts[1]) : 0) - decimals;
   const res = sign * Number(`${resBase}e${String(resExp)}`);
   return Object.is(res, -0) ? 0 : res;
+}
+
+export function addQuantity(
+  a: number,
+  b: number,
+  decimals: number = QUANTITY_MAX_DECIMALS,
+): number {
+  return roundQuantity(a + b, decimals);
+}
+
+export function subtractQuantity(
+  a: number,
+  b: number,
+  decimals: number = QUANTITY_MAX_DECIMALS,
+): number {
+  return roundQuantity(a - b, decimals);
 }
 
 export function isEqualQuantity(
