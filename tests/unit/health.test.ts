@@ -241,40 +241,30 @@ describe('engineering and data paradigms foundation', () => {
       false,
     );
 
-    // Enforces ok() returns parsed clean object without non-enumerable toJSON hooks
+    // Enforces rejection of plain objects with non-enumerable properties (including toJSON hooks)
     const payloadWithHook = { count: 42 };
     Object.defineProperty(payloadWithHook, 'toJSON', {
       value: () => 10n,
       enumerable: false,
     });
-    const sanitizedResult = ok(payloadWithHook, validIso);
-    expect(JSON.stringify(sanitizedResult)).toBe(
-      JSON.stringify({
-        success: true,
-        data: { count: 42 },
-        timestamp: validIso,
-      }),
-    );
+    expect(() => {
+      ok(payloadWithHook, validIso);
+    }).toThrow(/non-enumerable properties/);
 
-    // Enforces successResponseSchema with permissive schema strips non-enumerable toJSON hooks
+    // Enforces successResponseSchema with permissive schema rejects non-enumerable properties
     const permissiveSchema = successResponseSchema(z.unknown());
     const permissivePayload = { count: 42 };
     Object.defineProperty(permissivePayload, 'toJSON', {
       value: () => 10n,
       enumerable: false,
     });
-    const parsedPermissive = permissiveSchema.parse({
-      success: true,
-      data: permissivePayload,
-      timestamp: validIso,
-    });
-    expect(JSON.stringify(parsedPermissive)).toBe(
-      JSON.stringify({
+    expect(
+      permissiveSchema.safeParse({
         success: true,
-        data: { count: 42 },
+        data: permissivePayload,
         timestamp: validIso,
-      }),
-    );
+      }).success,
+    ).toBe(false);
 
     // Enforces rejection of nested non-plain response values
     const nestedNonPlainResult = successResponseSchema(z.unknown()).safeParse({
@@ -284,7 +274,7 @@ describe('engineering and data paradigms foundation', () => {
     });
     expect(nestedNonPlainResult.success).toBe(false);
 
-    // Enforces sanitization of the output of endpoint transforms
+    // Enforces rejection of endpoint transform outputs containing non-enumerable properties
     const transformSchema = successResponseSchema(
       z.string().transform(() => {
         const obj = { count: 100 };
@@ -295,18 +285,13 @@ describe('engineering and data paradigms foundation', () => {
         return obj;
       }),
     );
-    const parsedTransformed = transformSchema.parse({
-      success: true,
-      data: 'trigger',
-      timestamp: validIso,
-    });
-    expect(JSON.stringify(parsedTransformed)).toBe(
-      JSON.stringify({
+    expect(
+      transformSchema.safeParse({
         success: true,
-        data: { count: 100 },
+        data: 'trigger',
         timestamp: validIso,
-      }),
-    );
+      }).success,
+    ).toBe(false);
 
     // Enforces preservation of __proto__ in failure details
     const failWithProto = fail(
@@ -335,7 +320,7 @@ describe('engineering and data paradigms foundation', () => {
       }).success,
     ).toBe(false);
 
-    // Enforces rejection of plain objects with non-enumerable data properties
+    // Enforces rejection of plain objects with non-enumerable data or function properties
     const objWithHiddenData = { publicField: 'visible' };
     Object.defineProperty(objWithHiddenData, 'secretId', {
       value: 12345,
@@ -350,7 +335,23 @@ describe('engineering and data paradigms foundation', () => {
     ).toBe(false);
     expect(() => {
       ok(objWithHiddenData, validIso);
-    }).toThrow(/non-enumerable data properties/);
+    }).toThrow(/non-enumerable properties/);
+
+    const objWithHiddenMethod = { id: 1 };
+    Object.defineProperty(objWithHiddenMethod, 'run', {
+      value: () => 'exec',
+      enumerable: false,
+    });
+    expect(
+      successResponseSchema(z.unknown()).safeParse({
+        success: true,
+        data: objWithHiddenMethod,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(() => {
+      ok(objWithHiddenMethod, validIso);
+    }).toThrow(/non-enumerable properties/);
 
     // Enforces array sanitization without trusting overridden map method
     const hijackedArray: unknown = [1, 10n];

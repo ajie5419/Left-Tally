@@ -56,7 +56,11 @@ export function createServerApp(): Hono {
         try {
           return context.json(err.toResponse(now), err.status);
         } catch (handlerError) {
-          console.error('[BUSINESS_EXCEPTION_RESPONSE_FALLBACK]', handlerError);
+          const fallbackErrorName =
+            handlerError instanceof Error ? handlerError.name : 'UnknownError';
+          console.error(
+            `[BUSINESS_EXCEPTION_RESPONSE_FALLBACK] ${fallbackErrorName}`,
+          );
           return context.json(
             fail(
               err.code,

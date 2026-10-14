@@ -68,13 +68,9 @@ function assertPlainObjectProperties(value: object): void {
   const ownPropertyNames = Object.getOwnPropertyNames(value);
   for (const prop of ownPropertyNames) {
     const desc = Object.getOwnPropertyDescriptor(value, prop);
-    const isNonEnumerableData =
-      desc !== undefined &&
-      !desc.enumerable &&
-      typeof desc.value !== 'function';
-    if (isNonEnumerableData) {
+    if (desc !== undefined && !desc.enumerable) {
       throw new Error(
-        `Objects with non-enumerable data properties are not valid JSON structures: '${prop}'`,
+        `Objects with non-enumerable properties are not valid JSON structures: '${prop}'`,
       );
     }
   }
