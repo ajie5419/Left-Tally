@@ -11,14 +11,13 @@ import { healthRoutes } from './routes/health.js';
 
 export type BusinessHttpStatus = 400 | 403 | 404;
 
-export const BusinessErrorHttpStatusMap: Record<
-  BusinessErrorCodeType,
-  BusinessHttpStatus
-> = {
+export const BusinessErrorHttpStatusMap: Readonly<
+  Record<BusinessErrorCodeType, BusinessHttpStatus>
+> = Object.freeze({
   VALIDATION_FAILED: 400,
   NOT_FOUND: 404,
   FORBIDDEN: 403,
-};
+});
 
 export class BusinessException extends Error {
   readonly code: BusinessErrorCodeType;

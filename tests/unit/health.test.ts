@@ -3,6 +3,7 @@ import {
   app,
   createServerApp,
   BusinessException,
+  BusinessErrorHttpStatusMap,
   HTTPException,
 } from '../../apps/api/src/app';
 import {
@@ -324,6 +325,7 @@ describe('global error handling and HTTP status mapping', () => {
     );
     expect(validationEx.status).toBe(400);
     expect(validationEx.code).toBe('VALIDATION_FAILED');
+    expect(Object.isFrozen(BusinessErrorHttpStatusMap)).toBe(true);
 
     const forbiddenEx = new BusinessException(
       BusinessErrorCode.FORBIDDEN,
