@@ -57,12 +57,16 @@ export type EntityAuditBase = z.infer<typeof entityAuditBaseSchema>;
 /**
  * 2. Unified Result & Response DTO Paradigm
  */
+export const isoDatetimeStringSchema = z.iso.datetime({
+  message: 'timestamp must be an ISO datetime string',
+});
+
 export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z
     .object({
       success: z.literal(true),
       data: dataSchema,
-      timestamp: z.iso.datetime(),
+      timestamp: isoDatetimeStringSchema,
     })
     .strict();
 
@@ -72,7 +76,7 @@ export const failureResponseSchema = z
     code: z.string().min(1),
     message: z.string().min(1),
     details: z.unknown().optional(),
-    timestamp: z.iso.datetime(),
+    timestamp: isoDatetimeStringSchema,
   })
   .strict();
 
@@ -86,29 +90,28 @@ export type FailureResponse = z.infer<typeof failureResponseSchema>;
 
 export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
 
-export function ok<T>(
-  data: T,
-  timestamp: string = new Date().toISOString(),
-): SuccessResponse<T> {
+export function ok<T>(data: T, timestamp: string): SuccessResponse<T> {
+  const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
   return {
     success: true,
     data,
-    timestamp,
+    timestamp: validTimestamp,
   };
 }
 
 export function fail(
   code: string,
   message: string,
-  details?: unknown,
-  timestamp: string = new Date().toISOString(),
+  details: unknown,
+  timestamp: string,
 ): FailureResponse {
+  const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
   return {
     success: false,
     code,
     message,
     ...(details !== undefined ? { details } : {}),
-    timestamp,
+    timestamp: validTimestamp,
   };
 }
 
@@ -120,23 +123,17 @@ export const BusinessErrorCode: {
   readonly NOT_FOUND: 'NOT_FOUND';
   readonly FORBIDDEN: 'FORBIDDEN';
   readonly CONCURRENCY_CONFLICT: 'CONCURRENCY_CONFLICT';
-  readonly STATE_TRANSITION_INVALID: 'STATE_TRANSITION_INVALID';
-  readonly QUANTITY_MISMATCH: 'QUANTITY_MISMATCH';
-  readonly QUALITY_GATE_BLOCKED: 'QUALITY_GATE_BLOCKED';
 } = {
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   NOT_FOUND: 'NOT_FOUND',
   FORBIDDEN: 'FORBIDDEN',
   CONCURRENCY_CONFLICT: 'CONCURRENCY_CONFLICT',
-  STATE_TRANSITION_INVALID: 'STATE_TRANSITION_INVALID',
-  QUANTITY_MISMATCH: 'QUANTITY_MISMATCH',
-  QUALITY_GATE_BLOCKED: 'QUALITY_GATE_BLOCKED',
 };
 
 export type BusinessErrorCodeType =
   (typeof BusinessErrorCode)[keyof typeof BusinessErrorCode];
 
-export type BusinessHttpStatus = 400 | 403 | 404 | 409 | 422;
+export type BusinessHttpStatus = 400 | 403 | 404 | 409;
 
 export const BusinessErrorHttpStatusMap: Record<
   BusinessErrorCodeType,
@@ -146,9 +143,6 @@ export const BusinessErrorHttpStatusMap: Record<
   NOT_FOUND: 404,
   FORBIDDEN: 403,
   CONCURRENCY_CONFLICT: 409,
-  STATE_TRANSITION_INVALID: 422,
-  QUANTITY_MISMATCH: 422,
-  QUALITY_GATE_BLOCKED: 422,
 };
 
 export class BusinessException extends Error {
@@ -169,7 +163,7 @@ export class BusinessException extends Error {
     this.details = details;
   }
 
-  toResponse(timestamp: string = new Date().toISOString()): FailureResponse {
+  toResponse(timestamp: string): FailureResponse {
     return fail(this.code, this.message, this.details, timestamp);
   }
 }

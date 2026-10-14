@@ -60,6 +60,7 @@ describe('public bootstrap contract', () => {
     expect(body.success).toBe(false);
     expect(body.code).toBe('INTERNAL_SERVER_ERROR');
     expect(body.message).toBe('An unexpected internal error occurred');
+    expect(body.timestamp).toBeDefined();
     expect(JSON.stringify(body)).not.toContain('mysql://');
     expect(JSON.stringify(body)).not.toContain('secret_pass');
   });
@@ -94,30 +95,37 @@ describe('engineering and data paradigms foundation', () => {
     ).toBe(false);
   });
 
-  it('builds standard unified response DTOs and handles failure details', () => {
-    const successResult = ok(
-      { orderId: 'WO-20261014-01' },
-      '2026-10-14T10:00:00.000Z',
-    );
+  it('builds standard unified response DTOs with validated explicit timestamps', () => {
+    const validIso = '2026-10-14T10:00:00.000Z';
+    const successResult = ok({ orderId: 'WO-20261014-01' }, validIso);
     expect(successResult).toEqual({
       success: true,
       data: { orderId: 'WO-20261014-01' },
-      timestamp: '2026-10-14T10:00:00.000Z',
+      timestamp: validIso,
     });
 
     const failureResult = fail(
       BusinessErrorCode.VALIDATION_FAILED,
       'Invalid payload',
       { field: 'quantity' },
-      '2026-10-14T10:00:00.000Z',
+      validIso,
     );
     expect(failureResult).toEqual({
       success: false,
       code: 'VALIDATION_FAILED',
       message: 'Invalid payload',
       details: { field: 'quantity' },
-      timestamp: '2026-10-14T10:00:00.000Z',
+      timestamp: validIso,
     });
+
+    // Enforces explicit valid ISO timestamp string; rejects non-ISO strings
+    expect(() => {
+      ok({ id: 1 }, 'not-a-date');
+    }).toThrowError(/timestamp must be an ISO datetime string/);
+
+    expect(() => {
+      fail('CODE', 'msg', undefined, 'invalid-iso');
+    }).toThrowError(/timestamp must be an ISO datetime string/);
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {
@@ -137,5 +145,13 @@ describe('engineering and data paradigms foundation', () => {
       details: { currentVersion: 2 },
       timestamp: '2026-10-14T10:00:00.000Z',
     });
+
+    // Verifies BusinessErrorCode is strictly scoped to the 4 generic REST error codes in bootstrap
+    expect(Object.keys(BusinessErrorCode).sort()).toEqual([
+      'CONCURRENCY_CONFLICT',
+      'FORBIDDEN',
+      'NOT_FOUND',
+      'VALIDATION_FAILED',
+    ]);
   });
 });
