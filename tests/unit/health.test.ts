@@ -7,6 +7,8 @@ import {
 import {
   healthSchema,
   healthOpenApi,
+  z,
+  successResponseSchema,
   failureResponseSchema,
   ok,
   fail,
@@ -152,6 +154,32 @@ describe('engineering and data paradigms foundation', () => {
       };
       failureResponseSchema.parse(candidate);
     }).toThrow();
+
+    // Enforces successResponseSchema to reject non-JSON schemas like BigInt
+    expect(() => {
+      const bigintSchema = successResponseSchema(z.bigint());
+      const candidate: unknown = {
+        success: true,
+        data: 10n,
+        timestamp: validIso,
+      };
+      bigintSchema.parse(candidate);
+    }).toThrow();
+
+    // Enforces ok() returns parsed clean object without non-enumerable toJSON hooks
+    const payloadWithHook = { count: 42 };
+    Object.defineProperty(payloadWithHook, 'toJSON', {
+      value: () => 10n,
+      enumerable: false,
+    });
+    const sanitizedResult = ok(payloadWithHook, validIso);
+    expect(JSON.stringify(sanitizedResult)).toBe(
+      JSON.stringify({
+        success: true,
+        data: { count: 42 },
+        timestamp: validIso,
+      }),
+    );
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {

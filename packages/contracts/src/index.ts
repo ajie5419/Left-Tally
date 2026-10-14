@@ -1,4 +1,5 @@
 import { z } from 'zod';
+export { z };
 
 /** Service liveness does not represent database, identity or business readiness. */
 export const healthSchema = z
@@ -38,15 +39,6 @@ export const isoDatetimeStringSchema = z.iso.datetime({
   message: 'timestamp must be an ISO datetime string',
 });
 
-export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
-  z
-    .object({
-      success: z.literal(true),
-      data: dataSchema,
-      timestamp: isoDatetimeStringSchema,
-    })
-    .strict();
-
 export const jsonLiteralSchema = z.union([
   z.string(),
   z.number(),
@@ -70,6 +62,15 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   ]),
 );
 
+export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
+  z
+    .object({
+      success: z.literal(true),
+      data: z.intersection(jsonValueSchema, dataSchema),
+      timestamp: isoDatetimeStringSchema,
+    })
+    .strict();
+
 export const failureResponseSchema = z
   .object({
     success: z.literal(false),
@@ -90,16 +91,46 @@ export type FailureResponse = z.infer<typeof failureResponseSchema>;
 
 export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
 
+function sanitizeJsonValue(value: unknown): unknown {
+  if (value === null) {
+    return null;
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      throw new Error('Number must be finite and not NaN');
+    }
+    return value;
+  }
+  if (typeof value === 'string' || typeof value === 'boolean') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item: unknown) => sanitizeJsonValue(item));
+  }
+  if (typeof value === 'object') {
+    const record: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value)) {
+      record[key] = sanitizeJsonValue(val);
+    }
+    return record;
+  }
+  throw new Error('Value is not a valid JSON structure');
+}
+
 export function ok<T extends JsonValue = JsonValue>(
   data: T,
   timestamp: string,
 ): SuccessResponse<T> {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
-  const candidate: unknown = data;
-  jsonValueSchema.parse(candidate);
+  const sanitized = sanitizeJsonValue(data);
+  const schema: z.ZodType<T> = z.custom<T>((val) => {
+    jsonValueSchema.parse(val);
+    return true;
+  });
+  const validData = schema.parse(jsonValueSchema.parse(sanitized));
   return {
     success: true,
-    data,
+    data: validData,
     timestamp: validTimestamp,
   };
 }
