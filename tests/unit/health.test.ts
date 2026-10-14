@@ -297,6 +297,28 @@ describe('engineering and data paradigms foundation', () => {
     expect(Object.prototype.hasOwnProperty.call(Object.prototype, 'kept')).toBe(
       false,
     );
+
+    // Enforces array sanitization without trusting overridden map method
+    const hijackedArray: unknown = [1, 10n];
+    Object.defineProperty(hijackedArray, 'map', {
+      value: () => hijackedArray,
+    });
+    const hijackedResult = successResponseSchema(z.unknown()).safeParse({
+      success: true,
+      data: hijackedArray,
+      timestamp: validIso,
+    });
+    expect(hijackedResult.success).toBe(false);
+
+    // Enforces normalization of sparse array holes to null
+    const sparseArray: unknown[] = [1];
+    sparseArray[2] = 3;
+    const sparseResult = successResponseSchema(z.unknown()).parse({
+      success: true,
+      data: sparseArray,
+      timestamp: validIso,
+    });
+    expect(sparseResult.data).toEqual([1, null, 3]);
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {

@@ -73,7 +73,11 @@ function sanitizeJsonValue(value: unknown): unknown {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item: unknown) => sanitizeJsonValue(item));
+    const list: unknown[] = [];
+    for (let i = 0; i < value.length; i += 1) {
+      list.push(i in value ? sanitizeJsonValue(value[i]) : null);
+    }
+    return list;
   }
   if (typeof value === 'object') {
     if (!isPlainObject(value)) {
