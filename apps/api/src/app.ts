@@ -85,6 +85,36 @@ function resolveHttpErrorCode(status: number): string {
   return status >= 500 ? 'INTERNAL_SERVER_ERROR' : `HTTP_${String(status)}`;
 }
 
+const DISCARDED_EXCEPTION_HEADERS: ReadonlySet<string> = new Set([
+  'content-type',
+  'content-length',
+  'content-encoding',
+  'content-range',
+  'content-location',
+  'transfer-encoding',
+  'trailer',
+]);
+
+function extractExceptionHeaders(
+  res: Response | undefined,
+): Headers | undefined {
+  if (!res) {
+    return undefined;
+  }
+  const headers = new Headers();
+  res.headers.forEach((value, key) => {
+    const lower = key.toLowerCase();
+    if (!DISCARDED_EXCEPTION_HEADERS.has(lower)) {
+      if (lower === 'set-cookie') {
+        headers.append(key, value);
+      } else {
+        headers.set(key, value);
+      }
+    }
+  });
+  return headers;
+}
+
 function handleHttpException(
   err: HTTPException,
   context: Context,
@@ -102,17 +132,14 @@ function handleHttpException(
       ? err.message
       : `HTTP request failed with status ${String(status)}`;
   const code = resolveHttpErrorCode(status);
+  const exceptionHeaders = extractExceptionHeaders(err.res);
 
-  // Preserve safe standard response control headers while discarding representation metadata
-  const authHeader = err.res?.headers.get('www-authenticate');
-  const retryHeader = err.res?.headers.get('retry-after');
-  if (authHeader) {
-    context.header('WWW-Authenticate', authHeader);
+  if (exceptionHeaders) {
+    return context.json(fail(code, message, undefined, now), {
+      status,
+      headers: exceptionHeaders,
+    });
   }
-  if (retryHeader) {
-    context.header('Retry-After', retryHeader);
-  }
-
   return context.json(fail(code, message, undefined, now), status);
 }
 

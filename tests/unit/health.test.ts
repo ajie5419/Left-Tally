@@ -312,6 +312,38 @@ describe('global error handling and HTTP status mapping', () => {
     expect(body408.message).toBe('Request timed out');
   });
 
+  it('preserves protocol headers (Allow, Proxy-Authenticate, Set-Cookie) while discarding representation headers', async () => {
+    const testApp = createServerApp().get('/test-protocol-headers', (c) => {
+      c.header('Set-Cookie', 'session=active; Path=/');
+      const errorResponse = new Response('Method Not Allowed', {
+        status: 405,
+        headers: [
+          ['Allow', 'GET, HEAD'],
+          ['Proxy-Authenticate', 'Basic realm="test"'],
+          ['Set-Cookie', 'csrf_token=abc; SameSite=Strict'],
+          ['Set-Cookie', 'warning=rejected; Path=/'],
+          ['Content-Type', 'text/html'],
+          ['Content-Length', '18'],
+          ['Transfer-Encoding', 'chunked'],
+        ],
+      });
+      throw new HTTPException(405, { res: errorResponse });
+    });
+
+    const res = await testApp.request('/test-protocol-headers');
+    expect(res.status).toBe(405);
+    expect(res.headers.get('allow')).toBe('GET, HEAD');
+    expect(res.headers.get('proxy-authenticate')).toBe('Basic realm="test"');
+    expect(res.headers.get('content-type')).toContain('application/json');
+    expect(res.headers.get('transfer-encoding')).toBeNull();
+    const cookies = res.headers.getSetCookie();
+    expect(cookies).toEqual([
+      'session=active; Path=/',
+      'csrf_token=abc; SameSite=Strict',
+      'warning=rejected; Path=/',
+    ]);
+  });
+
   it('masks 5xx server exceptions and keeps database and credential details confidential', async () => {
     const testApp = createServerApp().get('/test-secret-leak', () => {
       throw new Error(
