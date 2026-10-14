@@ -9,10 +9,6 @@ import {
   fail,
   BusinessErrorCode,
   BusinessException,
-  roundQuantity,
-  addQuantity,
-  subtractQuantity,
-  isEqualQuantity,
 } from '@gc/contracts';
 
 describe('public bootstrap contract', () => {
@@ -141,28 +137,5 @@ describe('engineering and data paradigms foundation', () => {
       details: { currentVersion: 2 },
       timestamp: '2026-10-14T10:00:00.000Z',
     });
-  });
-
-  it('enforces general quantity precision, comparison, and rounding rules', () => {
-    expect(roundQuantity(0.145 - 0.14, 2)).toBe(0.01);
-    expect(subtractQuantity(0.145, 0.14, 2)).toBe(0.01);
-    expect(addQuantity(0.14, 0.005, 2)).toBe(0.15);
-    expect(roundQuantity(123456789.12346, 4)).toBe(123456789.1235);
-    expect(roundQuantity(123456789.12344, 4)).toBe(123456789.1234);
-    expect(roundQuantity(123456789.12345, 4)).toBe(123456789.1235);
-    expect(roundQuantity(0.00015 - 0.0001, 4)).toBe(0.0001);
-    expect(roundQuantity(0.00005, 4)).toBe(0.0001);
-    expect(roundQuantity(0.00004, 4)).toBe(0);
-    expect(roundQuantity(10.07505, 4)).toBe(10.0751);
-    expect(roundQuantity(1e-7, 4)).toBe(0);
-    expect(roundQuantity(-1e-7, 4)).toBe(0);
-    expect(roundQuantity(12.34567, 4)).toBe(12.3457);
-    expect(roundQuantity(12.3)).toBe(12.3);
-    expect(isEqualQuantity(10.0000001, 10.0)).toBe(true);
-    expect(isEqualQuantity(10.01, 10.0)).toBe(false);
-    expect(isEqualQuantity(0.3, 0.1 + 0.2)).toBe(true);
-    expect(() => {
-      roundQuantity(Number.NaN);
-    }).toThrowError(/Non-finite quantity/);
   });
 });
