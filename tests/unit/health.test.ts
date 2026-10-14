@@ -250,6 +250,53 @@ describe('engineering and data paradigms foundation', () => {
         timestamp: validIso,
       }),
     );
+
+    // Enforces rejection of nested non-plain response values
+    const nestedNonPlainResult = successResponseSchema(z.unknown()).safeParse({
+      success: true,
+      data: { when: new Date() },
+      timestamp: validIso,
+    });
+    expect(nestedNonPlainResult.success).toBe(false);
+
+    // Enforces sanitization of the output of endpoint transforms
+    const transformSchema = successResponseSchema(
+      z.string().transform(() => {
+        const obj = { count: 100 };
+        Object.defineProperty(obj, 'toJSON', {
+          value: () => 10n,
+          enumerable: false,
+        });
+        return obj;
+      }),
+    );
+    const parsedTransformed = transformSchema.parse({
+      success: true,
+      data: 'trigger',
+      timestamp: validIso,
+    });
+    expect(JSON.stringify(parsedTransformed)).toBe(
+      JSON.stringify({
+        success: true,
+        data: { count: 100 },
+        timestamp: validIso,
+      }),
+    );
+
+    // Enforces preservation of __proto__ in failure details
+    const failWithProto = fail(
+      'ERR',
+      'msg',
+      JSON.parse('{"__proto__":"kept","err":"failed"}'),
+      validIso,
+    );
+    expect(
+      Object.prototype.hasOwnProperty.call(failWithProto.details, '__proto__'),
+    ).toBe(true);
+    expect(JSON.stringify(failWithProto)).toContain('"__proto__":"kept"');
+    expect(Object.prototype.hasOwnProperty.call(Object.prototype, 'kept')).toBe(
+      false,
+    );
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {

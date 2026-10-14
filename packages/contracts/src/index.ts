@@ -54,79 +54,6 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | JsonValue[];
 
-export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
-  z.union([
-    jsonLiteralSchema,
-    z.array(jsonValueSchema),
-    z.record(z.string(), jsonValueSchema),
-  ]),
-);
-
-function cleanObjectHooks(val: object): unknown {
-  if (Array.isArray(val)) {
-    return val.map((item: unknown) => cleanValueHooks(item));
-  }
-  const record = Object.fromEntries(
-    Object.entries(val).map(([k, v]) => [k, cleanValueHooks(v)]),
-  );
-  return record;
-}
-
-function cleanValueHooks(val: unknown): unknown {
-  if (typeof val === 'object' && val !== null) {
-    return cleanObjectHooks(val);
-  }
-  return val;
-}
-
-export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
-  z
-    .object({
-      success: z.literal(true),
-      data: z
-        .preprocess((val) => {
-          if (typeof val === 'object' && val !== null) {
-            const proto: unknown = Object.getPrototypeOf(val);
-            if (proto === null || proto === Object.prototype) {
-              return cleanObjectHooks(val);
-            }
-          }
-          return val;
-        }, dataSchema)
-        .check((ctx) => {
-          const parsed = jsonValueSchema.safeParse(ctx.value);
-          if (!parsed.success) {
-            ctx.issues.push({
-              input: ctx.value,
-              code: 'custom',
-              message: parsed.error.message,
-            });
-          }
-        }),
-      timestamp: isoDatetimeStringSchema,
-    })
-    .strict();
-
-export const failureResponseSchema = z
-  .object({
-    success: z.literal(false),
-    code: z.string().min(1),
-    message: z.string().min(1),
-    details: jsonValueSchema.optional(),
-    timestamp: isoDatetimeStringSchema,
-  })
-  .strict();
-
-export type SuccessResponse<T> = {
-  success: true;
-  data: T;
-  timestamp: string;
-};
-
-export type FailureResponse = z.infer<typeof failureResponseSchema>;
-
-export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
-
 function isPlainObject(value: object): boolean {
   const proto: unknown = Object.getPrototypeOf(value);
   return proto === null || proto === Object.prototype;
@@ -162,17 +89,76 @@ function sanitizeJsonValue(value: unknown): unknown {
   throw new Error('Value is not a valid JSON structure');
 }
 
+export const jsonValueSchema: z.ZodType<JsonValue> = z
+  .unknown()
+  .transform((val, ctx): JsonValue => {
+    try {
+      const sanitized: unknown = sanitizeJsonValue(val);
+      const schema: z.ZodType<JsonValue> = z.custom<JsonValue>(() => true);
+      return schema.parse(sanitized);
+    } catch (err) {
+      ctx.addIssue({
+        code: 'custom',
+        message: err instanceof Error ? err.message : String(err),
+      });
+      return z.NEVER;
+    }
+  });
+
+export const successResponseSchema = <Output, Input>(
+  dataSchema: z.ZodType<Output, Input>,
+) =>
+  z
+    .object({
+      success: z.literal(true),
+      data: dataSchema.transform((val, ctx): Output => {
+        try {
+          const sanitized: unknown = sanitizeJsonValue(val);
+          const schema: z.ZodType<Output> = z.custom<Output>(() => true);
+          return schema.parse(sanitized);
+        } catch (err) {
+          ctx.addIssue({
+            code: 'custom',
+            message: err instanceof Error ? err.message : String(err),
+          });
+          return z.NEVER;
+        }
+      }),
+      timestamp: isoDatetimeStringSchema,
+    })
+    .strict();
+
+export const failureResponseSchema = z
+  .object({
+    success: z.literal(false),
+    code: z.string().min(1),
+    message: z.string().min(1),
+    details: jsonValueSchema.optional(),
+    timestamp: isoDatetimeStringSchema,
+  })
+  .strict();
+
+export type SuccessResponse<T> = {
+  success: true;
+  data: T;
+  timestamp: string;
+};
+
+export type FailureResponse = z.infer<typeof failureResponseSchema>;
+
+export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
+
 export function ok<T = unknown>(
   data: T,
   timestamp: string,
 ): SuccessResponse<T> {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
-  const sanitized = sanitizeJsonValue(data);
+  const sanitized: unknown = sanitizeJsonValue(data);
   const schema: z.ZodType<T> = z.custom<T>((val) => {
     jsonValueSchema.parse(val);
     return true;
   });
-  const validData = schema.parse(sanitized);
+  const validData: T = schema.parse(sanitized);
   return {
     success: true,
     data: validData,
@@ -183,7 +169,7 @@ export function ok<T = unknown>(
 export function fail(
   code: string,
   message: string,
-  details: JsonValue | undefined,
+  details: unknown,
   timestamp: string,
 ): FailureResponse {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
