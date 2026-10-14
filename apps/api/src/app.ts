@@ -85,22 +85,24 @@ function resolveHttpErrorCode(status: number): string {
   return status >= 500 ? 'INTERNAL_SERVER_ERROR' : `HTTP_${String(status)}`;
 }
 
-const DISCARDED_EXCEPTION_HEADERS: ReadonlySet<string> = new Set([
-  'content-type',
-  'content-length',
-  'content-encoding',
-  'content-language',
-  'content-range',
-  'content-location',
-  'content-md5',
+const REPRESENTATION_EXCLUDED_HEADER_NAMES: ReadonlySet<string> = new Set([
   'etag',
   'last-modified',
   'digest',
-  'content-digest',
   'repr-digest',
+  'want-digest',
+  'want-repr-digest',
   'transfer-encoding',
   'trailer',
+  'accept-ranges',
 ]);
+
+function isRepresentationHeader(name: string): boolean {
+  return (
+    name.startsWith('content-') ||
+    REPRESENTATION_EXCLUDED_HEADER_NAMES.has(name)
+  );
+}
 
 function extractExceptionHeaders(
   res: Response | undefined,
@@ -111,7 +113,7 @@ function extractExceptionHeaders(
   const headers = new Headers();
   res.headers.forEach((value, key) => {
     const lower = key.toLowerCase();
-    if (!DISCARDED_EXCEPTION_HEADERS.has(lower)) {
+    if (!isRepresentationHeader(lower)) {
       if (lower === 'set-cookie') {
         headers.append(key, value);
       } else {
