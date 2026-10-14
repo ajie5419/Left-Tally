@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { app } from '../../apps/api/src/app';
-import { assertWorkshopQuantityConservation } from '../../apps/api/src/domain/workshop';
+import { app, createServerApp } from '../../apps/api/src/app';
 import {
   healthSchema,
   healthOpenApi,
@@ -53,8 +52,13 @@ describe('public bootstrap contract', () => {
     expect((await app.request('/health', { method: 'POST' })).status).toBe(404);
   });
 
-  it('masks unhandled internal exceptions to prevent leaking sensitive details', async () => {
-    const response = await app.request('/test-error');
+  it('masks unhandled internal exceptions without exposing test routes in production', async () => {
+    const testApp = createServerApp().get('/test-error', () => {
+      throw new Error(
+        'Database connection to mysql://root:secret_pass@127.0.0.1:3306/prod failed',
+      );
+    });
+    const response = await testApp.request('/test-error');
     expect(response.status).toBe(500);
     const body = failureResponseSchema.parse(await response.json());
     expect(body.success).toBe(false);
@@ -139,52 +143,20 @@ describe('engineering and data paradigms foundation', () => {
     });
   });
 
-  it('enforces workshop quantity precision and conservation theorem', () => {
+  it('enforces general quantity precision, comparison, and rounding rules', () => {
     expect(roundQuantity(12.34567)).toBe(12.3457);
     expect(roundQuantity(12.3)).toBe(12.3);
     expect(roundQuantity(10.07505, 4)).toBe(10.0751);
+    expect(roundQuantity(1e-7, 4)).toBe(0);
+    expect(roundQuantity(-1e-7, 4)).toBe(0);
+    expect(roundQuantity(0.00004, 4)).toBe(0);
+    expect(roundQuantity(0.00005, 4)).toBe(0.0001);
     expect(isEqualQuantity(10.0000001, 10.0)).toBe(true);
     expect(isEqualQuantity(10.01, 10.0)).toBe(false);
-
+    expect(isEqualQuantity(0.3, 0.1 + 0.2)).toBe(true);
     expect(() => {
-      assertWorkshopQuantityConservation({
-        dispatched: 100,
-        inProgress: 40,
-        delivered: 50,
-        scrapped: 5,
-        pendingDisposal: 5,
-      });
-    }).not.toThrow();
-
-    expect(() => {
-      assertWorkshopQuantityConservation({
-        dispatched: 0.3,
-        inProgress: 0.1,
-        delivered: 0.2,
-        scrapped: 0,
-        pendingDisposal: 0,
-      });
-    }).not.toThrow();
-
-    expect(() => {
-      assertWorkshopQuantityConservation({
-        dispatched: 100,
-        inProgress: 40,
-        delivered: 50,
-        scrapped: 4,
-        pendingDisposal: 5,
-      });
-    }).toThrowError(/Workshop quantity conservation violation/);
-
-    expect(() => {
-      assertWorkshopQuantityConservation({
-        dispatched: 100,
-        inProgress: 110,
-        delivered: 0,
-        scrapped: -10,
-        pendingDisposal: 0,
-      });
-    }).toThrowError(/Negative or invalid quantity/);
+      roundQuantity(Number.NaN);
+    }).toThrowError(/Non-finite quantity/);
   });
 
   it('guards state machine transitions against illegal jumps', () => {

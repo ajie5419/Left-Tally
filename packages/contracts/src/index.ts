@@ -175,8 +175,7 @@ export class BusinessException extends Error {
 }
 
 /**
- * 4. Workshop Quantity Precision & Data Structures Paradigm
- * Note: Authority assertion resides in backend domain services.
+ * 4. General Quantity Precision & Comparison Paradigm
  */
 export const QUANTITY_MAX_DECIMALS = 4;
 export const QUANTITY_EPSILON = 1e-6;
@@ -191,8 +190,28 @@ export function roundQuantity(
       `Non-finite quantity value encountered: ${String(value)}`,
     );
   }
-  const scaled = Math.round(Number(`${String(value)}e${String(decimals)}`));
-  return Number(`${String(scaled)}e-${String(decimals)}`);
+  const threshold = 0.5 / 10 ** decimals;
+  if (Math.abs(value) < threshold) {
+    return 0;
+  }
+  const fixed = value.toFixed(decimals + 8);
+  const parts = fixed.split('.');
+  const integerPart = parts[0] ?? '0';
+  const fractionalPart = parts[1] ?? '';
+  const isNegative = integerPart.startsWith('-');
+  const cleanInt = isNegative ? integerPart.slice(1) : integerPart;
+  const digitsToKeep = fractionalPart.slice(0, decimals);
+  const nextDigit = Number(fractionalPart[decimals] ?? '0');
+
+  let rounded = BigInt(cleanInt + digitsToKeep);
+  if (nextDigit >= 5) {
+    rounded += 1n;
+  }
+  const str = rounded.toString().padStart(decimals + 1, '0');
+  const outInt = str.slice(0, str.length - decimals);
+  const outFrac = str.slice(str.length - decimals);
+  const sign = isNegative ? '-' : '';
+  return Number(`${sign}${outInt}.${outFrac}`);
 }
 
 export function isEqualQuantity(
@@ -202,14 +221,6 @@ export function isEqualQuantity(
 ): boolean {
   if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
   return Math.abs(a - b) <= epsilon;
-}
-
-export interface WorkshopConservationBreakdown {
-  dispatched: number;
-  inProgress: number;
-  delivered: number;
-  scrapped: number;
-  pendingDisposal: number;
 }
 
 /**
