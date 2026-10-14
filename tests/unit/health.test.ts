@@ -325,6 +325,10 @@ describe('global error handling and HTTP status mapping', () => {
           ['Content-Type', 'text/html'],
           ['Content-Length', '18'],
           ['Transfer-Encoding', 'chunked'],
+          ['ETag', 'W/"old-entity-tag"'],
+          ['Last-Modified', 'Wed, 14 Oct 2026 10:00:00 GMT'],
+          ['Digest', 'sha-256=stale-digest'],
+          ['Content-Digest', 'sha-256=:stale-content-digest:'],
         ],
       });
       throw new HTTPException(405, { res: errorResponse });
@@ -336,6 +340,10 @@ describe('global error handling and HTTP status mapping', () => {
     expect(res.headers.get('proxy-authenticate')).toBe('Basic realm="test"');
     expect(res.headers.get('content-type')).toContain('application/json');
     expect(res.headers.get('transfer-encoding')).toBeNull();
+    expect(res.headers.get('etag')).toBeNull();
+    expect(res.headers.get('last-modified')).toBeNull();
+    expect(res.headers.get('digest')).toBeNull();
+    expect(res.headers.get('content-digest')).toBeNull();
     const cookies = res.headers.getSetCookie();
     expect(cookies).toEqual([
       'session=active; Path=/',
