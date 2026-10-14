@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import {
   healthOpenApi,
@@ -47,6 +47,76 @@ export class BusinessException extends Error {
   }
 }
 
+function handleBusinessException(
+  err: BusinessException,
+  context: Context,
+  now: string,
+): Response {
+  try {
+    return context.json(err.toResponse(now), err.status);
+  } catch (handlerError) {
+    const fallbackErrorName =
+      handlerError instanceof Error ? handlerError.name : 'UnknownError';
+    console.error(
+      `[BUSINESS_EXCEPTION_RESPONSE_FALLBACK] ${fallbackErrorName}`,
+    );
+    return context.json(
+      fail(
+        err.code,
+        `Business operation failed with code '${err.code}'`,
+        undefined,
+        now,
+      ),
+      err.status,
+    );
+  }
+}
+
+function handleHttpException(
+  err: HTTPException,
+  context: Context,
+  now: string,
+): Response {
+  const status = err.status;
+  const isServerError = status >= 500;
+  if (isServerError) {
+    const errorName = err.name.trim().length > 0 ? err.name : 'HTTPException';
+    console.error(`[UNHANDLED_EXCEPTION] ${errorName}`);
+  }
+  const message = isServerError
+    ? 'An unexpected internal error occurred'
+    : err.message.trim().length > 0
+      ? err.message
+      : `HTTP request failed with status ${String(status)}`;
+  const code =
+    status === 400
+      ? 'VALIDATION_FAILED'
+      : status === 403
+        ? 'FORBIDDEN'
+        : status === 404
+          ? 'NOT_FOUND'
+          : isServerError
+            ? 'INTERNAL_SERVER_ERROR'
+            : `HTTP_${String(status)}`;
+  const responseHeaders = new Headers();
+  context.res.headers.forEach((value, key) => {
+    responseHeaders.set(key, value);
+  });
+  if (err.res) {
+    err.res.headers.forEach((value, key) => {
+      const lower = key.toLowerCase();
+      if (lower !== 'content-type' && lower !== 'content-length') {
+        responseHeaders.set(key, value);
+      }
+    });
+  }
+  return context.json(
+    fail(code, message, undefined, now),
+    status,
+    Object.fromEntries(responseHeaders.entries()),
+  );
+}
+
 export function createServerApp(): Hono {
   return new Hono()
     .notFound((context) => {
@@ -59,43 +129,10 @@ export function createServerApp(): Hono {
     .onError((err, context) => {
       const now = new Date().toISOString();
       if (err instanceof BusinessException) {
-        try {
-          return context.json(err.toResponse(now), err.status);
-        } catch (handlerError) {
-          const fallbackErrorName =
-            handlerError instanceof Error ? handlerError.name : 'UnknownError';
-          console.error(
-            `[BUSINESS_EXCEPTION_RESPONSE_FALLBACK] ${fallbackErrorName}`,
-          );
-          return context.json(
-            fail(
-              err.code,
-              `Business operation failed with code '${err.code}'`,
-              undefined,
-              now,
-            ),
-            err.status,
-          );
-        }
+        return handleBusinessException(err, context, now);
       }
       if (err instanceof HTTPException) {
-        if (err.res) {
-          return err.getResponse();
-        }
-        const statusText = String(err.status);
-        const message =
-          err.message.trim().length > 0
-            ? err.message
-            : `HTTP request failed with status ${statusText}`;
-        const code =
-          err.status === 400
-            ? 'VALIDATION_FAILED'
-            : err.status === 403
-              ? 'FORBIDDEN'
-              : err.status === 404
-                ? 'NOT_FOUND'
-                : `HTTP_${statusText}`;
-        return context.json(fail(code, message, undefined, now), err.status);
+        return handleHttpException(err, context, now);
       }
       const errorName = err instanceof Error ? err.name : 'UnknownError';
       console.error(`[UNHANDLED_EXCEPTION] ${errorName}`);

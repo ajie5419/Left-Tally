@@ -402,6 +402,42 @@ describe('global error handling and HTTP status mapping', () => {
     expect(parsedTimeout.message).toBe('Request Timeout');
   });
 
+  it('masks server-side 5xx HTTPException messages and normalizes custom res exceptions while preserving headers', async () => {
+    const testApp = createServerApp()
+      .get('/test-server-http-error', () => {
+        throw new HTTPException(503, {
+          message: 'upstream redis://secret-host:6379 failed',
+        });
+      })
+      .get('/test-custom-res-exception', (c) => {
+        c.header('X-Request-Id', 'req-12345');
+        throw new HTTPException(401, {
+          res: new Response('raw-body', {
+            headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' },
+          }),
+        });
+      });
+
+    const serverErrResponse = await testApp.request('/test-server-http-error');
+    expect(serverErrResponse.status).toBe(503);
+    const serverErrBody = failureResponseSchema.parse(
+      await serverErrResponse.json(),
+    );
+    expect(serverErrBody.success).toBe(false);
+    expect(serverErrBody.code).toBe('INTERNAL_SERVER_ERROR');
+    expect(serverErrBody.message).toBe('An unexpected internal error occurred');
+    expect(JSON.stringify(serverErrBody)).not.toContain('secret-host');
+
+    const customResResponse = await testApp.request(
+      '/test-custom-res-exception',
+    );
+    expect(customResResponse.status).toBe(401);
+    expect(customResResponse.headers.get('X-Request-Id')).toBe('req-12345');
+    expect(customResResponse.headers.get('WWW-Authenticate')).toBe(
+      'Bearer error="invalid_token"',
+    );
+  });
+
   it('masks unhandled internal exceptions without exposing sensitive details in production', async () => {
     const testApp = createServerApp().get('/test-error', () => {
       throw new Error(
