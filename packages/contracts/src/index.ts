@@ -190,15 +190,21 @@ export function roundQuantity(
       `Non-finite quantity value encountered: ${String(value)}`,
     );
   }
-  const normalized = Number(value.toPrecision(12));
-  if (Math.abs(normalized) < 1e-12) return 0;
+  const abs = Math.abs(value);
+  if (abs < 1e-12) return 0;
 
-  const parts = normalized.toString().split('e');
+  const sign = value < 0 ? -1 : 1;
+  const parts = abs.toString().split('e');
   const base = parts[0] ?? '0';
   const exp = parts[1] !== undefined ? Number(parts[1]) : 0;
   const shiftedExp = exp + decimals;
-  const shifted = Math.round(Number(`${base}e${String(shiftedExp)}`));
-  const res = Number(`${String(shifted)}e-${String(decimals)}`);
+  const shifted = Number(`${base}e${String(shiftedExp)}`);
+  const rounded = Math.round(shifted + Number.EPSILON);
+  const resParts = rounded.toString().split('e');
+  const resBase = resParts[0] ?? '0';
+  const resExp =
+    (resParts[1] !== undefined ? Number(resParts[1]) : 0) - decimals;
+  const res = sign * Number(`${resBase}e${String(resExp)}`);
   return Object.is(res, -0) ? 0 : res;
 }
 

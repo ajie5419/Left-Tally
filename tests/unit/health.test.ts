@@ -142,12 +142,15 @@ describe('engineering and data paradigms foundation', () => {
   });
 
   it('enforces general quantity precision, comparison, and rounding rules', () => {
+    expect(roundQuantity(123456789.12346, 4)).toBe(123456789.1235);
+    expect(roundQuantity(123456789.12344, 4)).toBe(123456789.1234);
+    expect(roundQuantity(123456789.12345, 4)).toBe(123456789.1235);
     expect(roundQuantity(0.00015 - 0.0001, 4)).toBe(0.0001);
     expect(roundQuantity(0.00005, 4)).toBe(0.0001);
+    expect(roundQuantity(0.00004, 4)).toBe(0);
     expect(roundQuantity(10.07505, 4)).toBe(10.0751);
     expect(roundQuantity(1e-7, 4)).toBe(0);
     expect(roundQuantity(-1e-7, 4)).toBe(0);
-    expect(roundQuantity(0.00004, 4)).toBe(0);
     expect(roundQuantity(12.34567, 4)).toBe(12.3457);
     expect(roundQuantity(12.3)).toBe(12.3);
     expect(isEqualQuantity(10.0000001, 10.0)).toBe(true);
