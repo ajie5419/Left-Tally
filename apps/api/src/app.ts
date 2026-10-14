@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import {
   healthOpenApi,
   fail,
@@ -67,6 +68,25 @@ export function createServerApp(): Hono {
           );
         }
       }
+      if (err instanceof HTTPException) {
+        if (err.res) {
+          return err.getResponse();
+        }
+        const statusText = String(err.status);
+        const message =
+          err.message.trim().length > 0
+            ? err.message
+            : `HTTP request failed with status ${statusText}`;
+        const code =
+          err.status === 400
+            ? 'VALIDATION_FAILED'
+            : err.status === 403
+              ? 'FORBIDDEN'
+              : err.status === 404
+                ? 'NOT_FOUND'
+                : `HTTP_${statusText}`;
+        return context.json(fail(code, message, undefined, now), err.status);
+      }
       console.error('[UNHANDLED_EXCEPTION]', err);
       return context.json(
         fail(
@@ -83,3 +103,4 @@ export function createServerApp(): Hono {
 }
 
 export const app = createServerApp();
+export { HTTPException };

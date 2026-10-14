@@ -3,6 +3,7 @@ import {
   app,
   createServerApp,
   BusinessException,
+  HTTPException,
 } from '../../apps/api/src/app';
 import {
   healthSchema,
@@ -68,6 +69,30 @@ describe('public bootstrap contract', () => {
     expect(JSON.stringify(body)).not.toContain('mysql://');
     expect(JSON.stringify(body)).not.toContain('secret_pass');
   });
+});
+
+it('preserves Hono HTTPException statuses in the error handler', async () => {
+  const testApp = createServerApp()
+    .get('/test-unauthorized', () => {
+      throw new HTTPException(401, { message: 'Authentication required' });
+    })
+    .get('/test-timeout', () => {
+      throw new HTTPException(408, { message: 'Request Timeout' });
+    });
+
+  const unauthResponse = await testApp.request('/test-unauthorized');
+  expect(unauthResponse.status).toBe(401);
+  const unauthBody = failureResponseSchema.parse(await unauthResponse.json());
+  expect(unauthBody.success).toBe(false);
+  expect(unauthBody.code).toBe('HTTP_401');
+  expect(unauthBody.message).toBe('Authentication required');
+
+  const timeoutResponse = await testApp.request('/test-timeout');
+  expect(timeoutResponse.status).toBe(408);
+  const timeoutBody = failureResponseSchema.parse(await timeoutResponse.json());
+  expect(timeoutBody.success).toBe(false);
+  expect(timeoutBody.code).toBe('HTTP_408');
+  expect(timeoutBody.message).toBe('Request Timeout');
 });
 
 it('safeguards global error handler from unhandled business exception escaping', async () => {
