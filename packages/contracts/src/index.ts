@@ -60,7 +60,9 @@ export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z
     .object({
       success: z.literal(true),
-      data: dataSchema,
+      data: dataSchema.refine((val) => jsonValueSchema.safeParse(val).success, {
+        message: 'Payload must be JSON-serializable',
+      }),
       timestamp: isoDatetimeStringSchema,
     })
     .strict();
@@ -87,6 +89,7 @@ export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
 
 export function ok<T>(data: T, timestamp: string): SuccessResponse<T> {
   const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
+  jsonValueSchema.parse(data);
   return {
     success: true,
     data,

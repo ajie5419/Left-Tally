@@ -152,6 +152,21 @@ describe('successResponseSchema', () => {
         data: 'test',
       }).success,
     ).toBe(false);
+
+    expect(
+      successResponseSchema(z.any()).safeParse({
+        success: true,
+        data: 10n,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
+    expect(
+      successResponseSchema(z.any()).safeParse({
+        success: true,
+        data: Number.NaN,
+        timestamp: validIso,
+      }).success,
+    ).toBe(false);
   });
 });
 
@@ -300,6 +315,8 @@ describe('ok and fail helper functions', () => {
     expect(() => ok({ id: 1 }, 'not-an-iso-string')).toThrowError(
       /timestamp must be an ISO datetime string/,
     );
+    expect(() => ok(10n, validIso)).toThrow();
+    expect(() => ok(Number.NaN, validIso)).toThrow();
   });
 
   it('fail builds valid FailureResponse and validates code, message, details, and timestamp', () => {
