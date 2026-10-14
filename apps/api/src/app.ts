@@ -8,7 +8,7 @@ import {
 } from '@gc/contracts';
 import { healthRoutes } from './routes/health.js';
 
-export type BusinessHttpStatus = 400 | 403 | 404 | 409;
+export type BusinessHttpStatus = 400 | 403 | 404;
 
 export const BusinessErrorHttpStatusMap: Record<
   BusinessErrorCodeType,
@@ -17,7 +17,6 @@ export const BusinessErrorHttpStatusMap: Record<
   VALIDATION_FAILED: 400,
   NOT_FOUND: 404,
   FORBIDDEN: 403,
-  CONCURRENCY_CONFLICT: 409,
 };
 
 export class BusinessException extends Error {

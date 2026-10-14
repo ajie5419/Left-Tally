@@ -75,7 +75,10 @@ function sanitizeJsonValue(value: unknown): unknown {
   if (Array.isArray(value)) {
     const list: unknown[] = [];
     for (let i = 0; i < value.length; i += 1) {
-      list.push(i in value ? sanitizeJsonValue(value[i]) : null);
+      if (!(i in value)) {
+        throw new Error('Sparse arrays are not valid JSON structures');
+      }
+      list.push(sanitizeJsonValue(value[i]));
     }
     return list;
   }
@@ -194,12 +197,10 @@ export const BusinessErrorCode: {
   readonly VALIDATION_FAILED: 'VALIDATION_FAILED';
   readonly NOT_FOUND: 'NOT_FOUND';
   readonly FORBIDDEN: 'FORBIDDEN';
-  readonly CONCURRENCY_CONFLICT: 'CONCURRENCY_CONFLICT';
 } = {
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   NOT_FOUND: 'NOT_FOUND',
   FORBIDDEN: 'FORBIDDEN',
-  CONCURRENCY_CONFLICT: 'CONCURRENCY_CONFLICT',
 };
 
 export type BusinessErrorCodeType =

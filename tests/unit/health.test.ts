@@ -310,32 +310,35 @@ describe('engineering and data paradigms foundation', () => {
     });
     expect(hijackedResult.success).toBe(false);
 
-    // Enforces normalization of sparse array holes to null
+    // Enforces rejection of sparse arrays to protect generic type contracts
     const sparseArray: unknown[] = [1];
     sparseArray[2] = 3;
-    const sparseResult = successResponseSchema(z.unknown()).parse({
+    const sparseResult = successResponseSchema(z.unknown()).safeParse({
       success: true,
       data: sparseArray,
       timestamp: validIso,
     });
-    expect(sparseResult.data).toEqual([1, null, 3]);
+    expect(sparseResult.success).toBe(false);
+    expect(() => {
+      ok(sparseArray, validIso);
+    }).toThrow(/Sparse arrays are not valid JSON structures/);
   });
 
   it('maps business exceptions to standardized error structures and HTTP status codes', () => {
     const ex = new BusinessException(
-      BusinessErrorCode.CONCURRENCY_CONFLICT,
-      'Optimistic locking conflict on version 1',
-      { currentVersion: 2 },
+      BusinessErrorCode.FORBIDDEN,
+      'Access to this resource is denied',
+      { resource: 'billing' },
     );
-    expect(ex.status).toBe(409);
-    expect(ex.code).toBe('CONCURRENCY_CONFLICT');
+    expect(ex.status).toBe(403);
+    expect(ex.code).toBe('FORBIDDEN');
 
     const res = ex.toResponse('2026-10-14T10:00:00.000Z');
     expect(res).toEqual({
       success: false,
-      code: 'CONCURRENCY_CONFLICT',
-      message: 'Optimistic locking conflict on version 1',
-      details: { currentVersion: 2 },
+      code: 'FORBIDDEN',
+      message: 'Access to this resource is denied',
+      details: { resource: 'billing' },
       timestamp: '2026-10-14T10:00:00.000Z',
     });
 
@@ -351,9 +354,8 @@ describe('engineering and data paradigms foundation', () => {
       false,
     );
 
-    // Verifies BusinessErrorCode is strictly scoped to the 4 generic REST error codes in bootstrap
+    // Verifies BusinessErrorCode is strictly scoped to the 3 generic REST error codes in bootstrap
     expect(Object.keys(BusinessErrorCode).sort()).toEqual([
-      'CONCURRENCY_CONFLICT',
       'FORBIDDEN',
       'NOT_FOUND',
       'VALIDATION_FAILED',
