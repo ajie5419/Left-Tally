@@ -32,9 +32,7 @@ export const healthOpenApi = {
   },
 };
 
-/**
- * 2. Unified Result & Response DTO Paradigm
- */
+/** JSON result validation is declarative; native HTTP responses have a separate contract. */
 export const isoDatetimeStringSchema = z.iso.datetime({
   message: 'timestamp must be an ISO datetime string',
 });
@@ -45,16 +43,7 @@ export type JsonValue =
   | { [key: string]: JsonValue }
   | JsonValue[];
 
-export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
-  z.union([
-    z.string(),
-    z.number().refine(Number.isFinite, { message: 'Number must be finite' }),
-    z.boolean(),
-    z.null(),
-    z.array(jsonValueSchema),
-    z.record(z.string(), jsonValueSchema),
-  ]),
-);
+export const jsonValueSchema: z.ZodType<JsonValue> = z.json();
 
 export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z
@@ -85,6 +74,7 @@ export type SuccessResponse<T> = {
 
 export type FailureResponse = z.infer<typeof failureResponseSchema>;
 
+/** Application JSON results only; explicit HTTPException responses may use other media types. */
 export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
 
 export function ok<T>(data: T, timestamp: string): SuccessResponse<T> {
@@ -112,9 +102,7 @@ export function fail(
   });
 }
 
-/**
- * 3. Standard Business Exceptions & Error Codes Paradigm
- */
+/** Stable public business codes; authoritative HTTP mapping belongs to the API. */
 export const BusinessErrorCode: Readonly<{
   readonly VALIDATION_FAILED: 'VALIDATION_FAILED';
   readonly NOT_FOUND: 'NOT_FOUND';

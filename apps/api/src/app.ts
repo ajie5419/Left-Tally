@@ -28,7 +28,6 @@ export class BusinessException extends Error {
     code: BusinessErrorCodeType,
     message: string,
     details?: JsonValue,
-    statusOverride?: BusinessHttpStatus,
   ) {
     const trimmed = message.trim();
     const resolvedMessage =
@@ -38,7 +37,7 @@ export class BusinessException extends Error {
     super(resolvedMessage);
     this.name = 'BusinessException';
     this.code = code;
-    this.status = statusOverride ?? BusinessErrorHttpStatusMap[code];
+    this.status = BusinessErrorHttpStatusMap[code];
     this.details = details;
   }
 
@@ -85,55 +84,24 @@ function resolveHttpErrorCode(status: number): string {
   return status >= 500 ? 'INTERNAL_SERVER_ERROR' : `HTTP_${String(status)}`;
 }
 
-const REPRESENTATION_EXCLUDED_HEADER_NAMES: ReadonlySet<string> = new Set([
-  'etag',
-  'last-modified',
-  'digest',
-  'repr-digest',
-  'want-digest',
-  'want-repr-digest',
-  'transfer-encoding',
-  'trailer',
-  'accept-ranges',
-]);
-
-function isRepresentationHeader(name: string): boolean {
-  return (
-    name.startsWith('content-') ||
-    REPRESENTATION_EXCLUDED_HEADER_NAMES.has(name)
-  );
-}
-
-function extractExceptionHeaders(
-  res: Response | undefined,
-): Headers | undefined {
-  if (!res) {
-    return undefined;
-  }
-  const headers = new Headers();
-  res.headers.forEach((value, key) => {
-    const lower = key.toLowerCase();
-    if (!isRepresentationHeader(lower)) {
-      if (lower === 'set-cookie') {
-        headers.append(key, value);
-      } else {
-        headers.set(key, value);
-      }
-    }
-  });
-  return headers;
-}
-
 function handleHttpException(
   err: HTTPException,
   context: Context,
   now: string,
 ): Response {
+  if (err.res) {
+    const response = err.getResponse();
+    /**
+     * getResponse() does not include Context headers. Use Hono's response
+     * factory without rewriting the body or maintaining protocol header lists.
+     * Explicit responses are public output, including intentional 5xx bodies.
+     */
+    return context.newResponse(response.body, response);
+  }
   const status = err.status;
   const isServerError = status >= 500;
   if (isServerError) {
-    const errorName = err.name.trim().length > 0 ? err.name : 'HTTPException';
-    console.error(`[UNHANDLED_EXCEPTION] ${errorName}`);
+    console.error('[UNHANDLED_EXCEPTION] HTTPException');
   }
   const message = isServerError
     ? 'An unexpected internal error occurred'
@@ -141,14 +109,6 @@ function handleHttpException(
       ? err.message
       : `HTTP request failed with status ${String(status)}`;
   const code = resolveHttpErrorCode(status);
-  const exceptionHeaders = extractExceptionHeaders(err.res);
-
-  if (exceptionHeaders) {
-    return context.json(fail(code, message, undefined, now), {
-      status,
-      headers: exceptionHeaders,
-    });
-  }
   return context.json(fail(code, message, undefined, now), status);
 }
 
@@ -169,8 +129,7 @@ export function createServerApp(): Hono {
       if (err instanceof HTTPException) {
         return handleHttpException(err, context, now);
       }
-      const errorName = err instanceof Error ? err.name : 'UnknownError';
-      console.error(`[UNHANDLED_EXCEPTION] ${errorName}`);
+      console.error('[UNHANDLED_EXCEPTION] Error');
       return context.json(
         fail(
           'INTERNAL_SERVER_ERROR',
