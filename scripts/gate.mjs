@@ -34,6 +34,7 @@ for (const task of [...required, 'check:gate', 'verify']) {
 }
 for (const path of [
   'tests/unit/health.test.ts',
+  'tests/unit/contracts.test.ts',
   'tests/unit/scanner.test.ts',
   'tests/unit/database-isolation.test.ts',
   'tests/unit/ci.test.ts',
