@@ -93,3 +93,58 @@ it('refuses persistent or host mounts and extra capabilities', () => {
     expect(result.stderr).toContain('MYSQL_PROBE_ISOLATION_UNKNOWN');
   }
 });
+
+const header =
+  'ID                   IMAGE                           OS     ARCH   STATE    IP  CPUS  MEMORY   STARTED';
+const rows = [
+  'existing-cache       docker.io/library/redis:alpine  linux  arm64  stopped      4     1024 MB  ',
+  'existing-database    docker.io/library/mysql:8.0     linux  arm64  stopped      4     1024 MB  ',
+  'existing-postgres    docker.io/library/postgres:16   linux  arm64  stopped      4     1024 MB  ',
+];
+
+function sameInventory(before: string[], after: string[]) {
+  const script = `import { sameInventory } from './scripts/database-backend.mjs'; console.log(sameInventory(${JSON.stringify(before.join('\n') + '\n')}, ${JSON.stringify(after.join('\n') + '\n')}));`;
+  const run = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', script],
+    { encoding: 'utf8' },
+  );
+  expect(run.status).toBe(0);
+  return run.stdout.trim();
+}
+
+it('accepts an unchanged inventory listed in a different order', () => {
+  const [first = '', second = '', third = ''] = rows;
+  expect(sameInventory([header, ...rows], [header, second, third, first])).toBe(
+    'true',
+  );
+});
+
+it('detects added, removed or altered existing containers', () => {
+  const [first = '', second = '', third = ''] = rows;
+  expect(sameInventory([header, ...rows], [header, first, second])).toBe(
+    'false',
+  );
+  expect(
+    sameInventory(
+      [header, ...rows],
+      [
+        header,
+        ...rows,
+        rows[0]?.replace('existing-cache', 'new-container') ?? '',
+      ],
+    ),
+  ).toBe('false');
+  expect(
+    sameInventory(
+      [header, ...rows],
+      [header, first, second, third.replace('stopped', 'running')],
+    ),
+  ).toBe('false');
+  expect(
+    sameInventory(
+      [header, first, first, second],
+      [header, first, second, second],
+    ),
+  ).toBe('false');
+});

@@ -75,3 +75,16 @@ export function containerBackend(name) {
     };
   throw new Error('MYSQL_PROBE_BACKEND_UNKNOWN');
 }
+
+/**
+ * Container CLIs do not guarantee listing order, so compare listings as
+ * multisets of exact lines: any added, removed or altered row still differs.
+ */
+export function sameInventory(before, after) {
+  const rows = (text) =>
+    text
+      .split('\n')
+      .filter((line) => line.trim())
+      .sort();
+  return JSON.stringify(rows(before)) === JSON.stringify(rows(after));
+}
