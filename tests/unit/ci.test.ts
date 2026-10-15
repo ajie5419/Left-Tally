@@ -1,5 +1,11 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  rmSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { afterEach, expect, it } from 'vitest';
@@ -51,8 +57,17 @@ it('accepts complete isolated checker inputs for the versioned artifact scope', 
 
 it('refuses legacy scope when untracked files are missing in local mode', () => {
   const directory = fixture('normal');
-  // In local mode (empty GC_CHECKOUT_SCOPE), gate.mjs requires all 43 opening files.
-  // The isolated fixture only has versioned files, so it must fail with OLD_FILE_CHANGED.
+  // In local mode (empty GC_CHECKOUT_SCOPE), gate.mjs requires every opening file.
+  // Add an untracked legacy entry the isolated fixture lacks, independent of today's inventory size.
+  const inventory = join(directory, 'evidence/bootstrap/opening-sha256.json');
+  const entries: unknown = JSON.parse(readFileSync(inventory, 'utf8'));
+  const missing = {
+    'Grand Comptroller/untracked-legacy-artifact.md': '0'.repeat(64),
+  };
+  writeFileSync(
+    inventory,
+    JSON.stringify(Object.assign({}, entries, missing), null, 2) + '\n',
+  );
   const run = spawnSync(
     process.execPath,
     [
@@ -67,7 +82,9 @@ it('refuses legacy scope when untracked files are missing in local mode', () => 
     },
   );
   expect(run.status).toBe(1);
-  expect(run.stdout).toContain('OLD_FILE_CHANGED');
+  expect(run.stdout).toContain(
+    'OLD_FILE_CHANGED: Grand Comptroller/untracked-legacy-artifact.md',
+  );
 });
 
 for (const [scenario, diagnostic] of [

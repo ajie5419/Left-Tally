@@ -6,9 +6,9 @@ import { legacyScope } from './ci/legacy.mjs';
 
 const baseline = {
   'AGENTS.md':
-    '0da12ca487f847733db1bb8a47775a094cbb537c5b1a2f993f98b0651cc596ce',
+    '778bc7b6bfc282259929ce0cc45e2b8639af8798347c5c6665408032632fbb55',
   'Grand Comptroller/工程治理与门禁基线-2026-10-13.md':
-    '33439620e6f87bcb1ea880d1929a07df4dc0278e5054c51513bef5ab885c19e0',
+    'bec3385064b079133c869942b17b75c0d09b7f764a82db09406fc26cb26d93ff',
 };
 const required = [
   'check:static',
@@ -34,6 +34,7 @@ for (const task of [...required, 'check:gate', 'verify']) {
 }
 for (const path of [
   'tests/unit/health.test.ts',
+  'tests/unit/contracts.test.ts',
   'tests/unit/scanner.test.ts',
   'tests/unit/database-isolation.test.ts',
   'tests/unit/ci.test.ts',

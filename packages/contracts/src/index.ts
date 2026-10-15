@@ -1,4 +1,5 @@
 import { z } from 'zod';
+export { z };
 
 /** Service liveness does not represent database, identity or business readiness. */
 export const healthSchema = z
@@ -30,3 +31,87 @@ export const healthOpenApi = {
     },
   },
 };
+
+/** JSON result validation is declarative; native HTTP responses have a separate contract. */
+export const isoDatetimeStringSchema = z.iso.datetime({
+  message: 'timestamp must be an ISO datetime string',
+});
+
+export type JsonLiteral = string | number | boolean | null;
+export type JsonValue =
+  | JsonLiteral
+  | { [key: string]: JsonValue }
+  | JsonValue[];
+
+export const jsonValueSchema: z.ZodType<JsonValue> = z.json();
+
+export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
+  z
+    .object({
+      success: z.literal(true),
+      data: dataSchema.refine((val) => jsonValueSchema.safeParse(val).success, {
+        message: 'Payload must be JSON-serializable',
+      }),
+      timestamp: isoDatetimeStringSchema,
+    })
+    .strict();
+
+export const failureResponseSchema = z
+  .object({
+    success: z.literal(false),
+    code: z.string().min(1),
+    message: z.string().min(1),
+    details: jsonValueSchema.optional(),
+    timestamp: isoDatetimeStringSchema,
+  })
+  .strict();
+
+export type SuccessResponse<T> = {
+  success: true;
+  data: T;
+  timestamp: string;
+};
+
+export type FailureResponse = z.infer<typeof failureResponseSchema>;
+
+/** Application JSON results only; explicit HTTPException responses may use other media types. */
+export type ApiResponse<T> = SuccessResponse<T> | FailureResponse;
+
+export function ok<T>(data: T, timestamp: string): SuccessResponse<T> {
+  const validTimestamp = isoDatetimeStringSchema.parse(timestamp);
+  jsonValueSchema.parse(data);
+  return {
+    success: true,
+    data,
+    timestamp: validTimestamp,
+  };
+}
+
+export function fail(
+  code: string,
+  message: string,
+  details: unknown,
+  timestamp: string,
+): FailureResponse {
+  return failureResponseSchema.parse({
+    success: false,
+    code,
+    message,
+    ...(details !== undefined ? { details } : {}),
+    timestamp,
+  });
+}
+
+/** Stable public business codes; authoritative HTTP mapping belongs to the API. */
+export const BusinessErrorCode: Readonly<{
+  readonly VALIDATION_FAILED: 'VALIDATION_FAILED';
+  readonly NOT_FOUND: 'NOT_FOUND';
+  readonly FORBIDDEN: 'FORBIDDEN';
+}> = Object.freeze({
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  NOT_FOUND: 'NOT_FOUND',
+  FORBIDDEN: 'FORBIDDEN',
+});
+
+export type BusinessErrorCodeType =
+  (typeof BusinessErrorCode)[keyof typeof BusinessErrorCode];

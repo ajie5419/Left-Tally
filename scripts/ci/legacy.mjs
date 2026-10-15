@@ -20,6 +20,6 @@ export function legacyScope(opening, baseline) {
   return {
     paths: baseline,
     userArtifacts:
-      'outside versioned CI artifact; local 43-file audit still required',
+      'outside versioned CI artifact; local opening-file audit still required',
   };
 }

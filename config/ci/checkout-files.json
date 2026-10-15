@@ -61,6 +61,7 @@
   "tests/e2e/bootstrap.spec.ts",
   "tests/support/ci-fixture.mjs",
   "tests/unit/ci.test.ts",
+  "tests/unit/contracts.test.ts",
   "tests/unit/database-isolation.test.ts",
   "tests/unit/health.test.ts",
   "tests/unit/scanner.test.ts",
