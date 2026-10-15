@@ -6,9 +6,9 @@ import { legacyScope } from './ci/legacy.mjs';
 
 const baseline = {
   'AGENTS.md':
-    '0da12ca487f847733db1bb8a47775a094cbb537c5b1a2f993f98b0651cc596ce',
+    '778bc7b6bfc282259929ce0cc45e2b8639af8798347c5c6665408032632fbb55',
   'Grand Comptroller/工程治理与门禁基线-2026-10-13.md':
-    '33439620e6f87bcb1ea880d1929a07df4dc0278e5054c51513bef5ab885c19e0',
+    '8a9eed97c552e4dc1ce57127f1fdd04ba67f911d217c770adc25b41ade5e4226',
 };
 const required = [
   'check:static',

@@ -1,0 +1,834 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Grand Comptroller · 履约流程图</title><style>
+:root{color-scheme:light;--ink:#193347;--blue:#245a88;--muted:#566b7c}*{box-sizing:border-box}body{margin:0;background:#f3f6f8;color:var(--ink);font-family:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif}header{background:white;border-top:7px solid var(--blue);padding:28px 32px 22px}h1{font-size:28px;line-height:1.4;margin:0 0 10px;font-weight:650}header p{font-size:14px;line-height:1.8;margin:0;color:var(--muted)}.relation{margin-top:14px;font-size:16px;font-weight:600;color:#245a88}nav{display:flex;gap:8px;flex-wrap:wrap;padding:16px 24px 0}.tab,.tools button{font:inherit;cursor:pointer;border:1px solid #c0cfdb;background:white;color:var(--ink);padding:10px 14px;border-radius:5px}.tab[aria-selected=true]{background:#245a88;color:white;border-color:#245a88}button:focus-visible{outline:3px solid #bc6a13;outline-offset:3px}.tools{padding:14px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.tools span{font-size:12px;color:var(--muted)}main{padding:0 24px 24px}.panel{background:white;border:1px solid #d5e0e7;padding:22px}.panel[hidden]{display:none}h2{font-size:20px;margin:0 0 8px}.intro,.note{font-size:14px;line-height:1.8;margin:0 0 16px}.note{margin:16px 0 0;padding-left:12px;border-left:3px solid #3e8a76;color:#42596b;max-width:80ch}.viewer{overflow:auto;max-height:72vh;min-height:300px;background:white;border:1px solid #e0e7ed}.drawing{width:100%;min-width:300px}.drawing svg{display:block;width:100%;height:auto}.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:12px}.legend i{display:inline-block;width:12px;height:12px;border:1px solid #95a6b6;margin-right:5px;vertical-align:-1px}footer{font-size:12px;line-height:1.8;color:var(--muted);padding:0 24px 26px} @media(max-width:600px){header{padding:20px}h1{font-size:23px}main{padding:0 12px 18px}.panel{padding:14px}nav,.tools{padding-left:12px;padding-right:12px}}@media print{nav,.tools{display:none}body{background:white}.panel[hidden]{display:block}.panel{break-after:page;border:0}.viewer{max-height:none;overflow:visible}.drawing{width:100%!important}header{border-top:0}}
+</style><header><h1>项目全链条履约流程</h1><p>Grand Comptroller　业务讨论版 · 2026-10-13</p><div class="relation">一份合同 / 一个项目　→　多台设备 / 多个工单　→　每工单独立计划</div><div class="legend"><span><i style="background:#eef0fa"></i>销售</span><span><i style="background:#e7effa"></i>项目部</span><span><i style="background:#e4f3f2"></i>技术</span><span><i style="background:#f0ecf9"></i>工艺</span><span><i style="background:#fff1dc"></i>采购</span><span><i style="background:#e9f0f5"></i>生产</span><span><i style="background:#e7f3e8"></i>品质 / QMS</span><span><i style="background:#e6f3f8"></i>现场 / 流转</span></div><p class="note">新版口径依据需求基线与关键业务设计；下图为业务说明，非已接通系统。自动阶段支持并行；预计首批发货与全部发完、到货、装船及验收节点分开。首批初次项目部确认，后续生产项目负责人或项目部调整立即重算并留历史；剩余自然日固定录入基准。理论齐套未知不能填零，实物可做范围另核实。</p></header><nav role="tablist"><button class="tab" data-i="0" aria-selected="true">全链条履约</button><button class="tab" data-i="1" aria-selected="false">生产与外协流转</button><button class="tab" data-i="2" aria-selected="false">问题处理与变更</button></nav><div class="tools"><button id="fit">适应宽度</button><button id="actual">阅读尺寸</button><button id="minus" aria-label="缩小">−</button><button id="plus" aria-label="放大">＋</button><button id="print">打印</button><span>切换流程后可放大查看，图内可滚动。</span></div><main><section class="panel" id="p0" ><h2>全链条履约</h2><p class="intro">按设备工单展开，技术、工艺、采购与制造分批并行。</p><div class="viewer"><div class="drawing"><svg width="658pt" height="1735pt"
+ viewBox="0.00 0.00 658.00 1735.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="chart0_graph0" class="graph" transform="scale(1 1) rotate(0) translate(18 1717)">
+<title>main</title>
+<polygon fill="white" stroke="transparent" points="-18,18 -18,-1717 640,-1717 640,18 -18,18"/>
+<!-- SALE -->
+<g id="chart0_node1" class="node">
+<title>SALE</title>
+<path fill="#eef0fa" stroke="#8ba0b7" d="M368,-1699C368,-1699 174,-1699 174,-1699 168,-1699 162,-1693 162,-1687 162,-1687 162,-1665 162,-1665 162,-1659 168,-1653 174,-1653 174,-1653 368,-1653 368,-1653 374,-1653 380,-1659 380,-1665 380,-1665 380,-1687 380,-1687 380,-1693 374,-1699 368,-1699"/>
+<text text-anchor="middle" x="271" y="-1679.6" font-family="Noto Sans CJK SC" font-size="13.00">事业部销售 · 签前评审</text>
+<text text-anchor="middle" x="271" y="-1665.6" font-family="Noto Sans CJK SC" font-size="13.00">各部门评估要求与交期，书面签字</text>
+</g>
+<!-- CON -->
+<g id="chart0_node2" class="node">
+<title>CON</title>
+<path fill="#eef0fa" stroke="#8ba0b7" d="M336,-1616C336,-1616 206,-1616 206,-1616 200,-1616 194,-1610 194,-1604 194,-1604 194,-1582 194,-1582 194,-1576 200,-1570 206,-1570 206,-1570 336,-1570 336,-1570 342,-1570 348,-1576 348,-1582 348,-1582 348,-1604 348,-1604 348,-1610 342,-1616 336,-1616"/>
+<text text-anchor="middle" x="271" y="-1596.6" font-family="Noto Sans CJK SC" font-size="13.00">签订合同、技术协议</text>
+<text text-anchor="middle" x="271" y="-1582.6" font-family="Noto Sans CJK SC" font-size="13.00">一个项目对应一份合同</text>
+</g>
+<!-- SALE&#45;&gt;CON -->
+<g id="chart0_edge1" class="edge">
+<title>SALE&#45;&gt;CON</title>
+<path fill="none" stroke="#586b7d" d="M271,-1652.87C271,-1643.76 271,-1633.08 271,-1623.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="273.45,-1623.11 271,-1616.11 268.55,-1623.11 273.45,-1623.11"/>
+</g>
+<!-- PLAN -->
+<g id="chart0_node3" class="node">
+<title>PLAN</title>
+<path fill="#e7effa" stroke="#8ba0b7" d="M355,-1533C355,-1533 187,-1533 187,-1533 181,-1533 175,-1527 175,-1521 175,-1521 175,-1499 175,-1499 175,-1493 181,-1487 187,-1487 187,-1487 355,-1487 355,-1487 361,-1487 367,-1493 367,-1499 367,-1499 367,-1521 367,-1521 367,-1527 361,-1533 355,-1533"/>
+<text text-anchor="middle" x="271" y="-1513.6" font-family="Noto Sans CJK SC" font-size="13.00">项目部 · 建工单、编计划</text>
+<text text-anchor="middle" x="271" y="-1499.6" font-family="Noto Sans CJK SC" font-size="13.00">一台设备一个工单，各有计划</text>
+</g>
+<!-- CON&#45;&gt;PLAN -->
+<g id="chart0_edge2" class="edge">
+<title>CON&#45;&gt;PLAN</title>
+<path fill="none" stroke="#586b7d" d="M271,-1569.87C271,-1560.76 271,-1550.08 271,-1540.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="273.45,-1540.11 271,-1533.11 268.55,-1540.11 273.45,-1540.11"/>
+</g>
+<!-- CONF -->
+<g id="chart0_node4" class="node">
+<title>CONF</title>
+<path fill="#e7effa" stroke="#8ba0b7" d="M374.5,-1450C374.5,-1450 167.5,-1450 167.5,-1450 161.5,-1450 155.5,-1444 155.5,-1438 155.5,-1438 155.5,-1416 155.5,-1416 155.5,-1410 161.5,-1404 167.5,-1404 167.5,-1404 374.5,-1404 374.5,-1404 380.5,-1404 386.5,-1410 386.5,-1416 386.5,-1416 386.5,-1438 386.5,-1438 386.5,-1444 380.5,-1450 374.5,-1450"/>
+<text text-anchor="middle" x="271" y="-1430.6" font-family="Noto Sans CJK SC" font-size="13.00">技术／工艺／采购／生产确认</text>
+<text text-anchor="middle" x="271" y="-1416.6" font-family="Noto Sans CJK SC" font-size="13.00">不能满足时，项目部协调日期与顺序</text>
+</g>
+<!-- PLAN&#45;&gt;CONF -->
+<g id="chart0_edge3" class="edge">
+<title>PLAN&#45;&gt;CONF</title>
+<path fill="none" stroke="#586b7d" d="M271,-1486.87C271,-1477.76 271,-1467.08 271,-1457.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="273.45,-1457.11 271,-1450.11 268.55,-1457.11 273.45,-1457.11"/>
+</g>
+<!-- TECH -->
+<g id="chart0_node5" class="node">
+<title>TECH</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M380.5,-1367C380.5,-1367 161.5,-1367 161.5,-1367 155.5,-1367 149.5,-1361 149.5,-1355 149.5,-1355 149.5,-1333 149.5,-1333 149.5,-1327 155.5,-1321 161.5,-1321 161.5,-1321 380.5,-1321 380.5,-1321 386.5,-1321 392.5,-1327 392.5,-1333 392.5,-1333 392.5,-1355 392.5,-1355 392.5,-1361 386.5,-1367 380.5,-1367"/>
+<text text-anchor="middle" x="271" y="-1347.6" font-family="Noto Sans CJK SC" font-size="13.00">技术 · 各专业分批准备</text>
+<text text-anchor="middle" x="271" y="-1333.6" font-family="Noto Sans CJK SC" font-size="13.00">长周期件优先；按总成或部件成套出图</text>
+</g>
+<!-- CONF&#45;&gt;TECH -->
+<g id="chart0_edge4" class="edge">
+<title>CONF&#45;&gt;TECH</title>
+<path fill="none" stroke="#586b7d" d="M271,-1403.87C271,-1394.76 271,-1384.08 271,-1374.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="273.45,-1374.11 271,-1367.11 268.55,-1374.11 273.45,-1374.11"/>
+</g>
+<!-- BUYREQ -->
+<g id="chart0_node6" class="node">
+<title>BUYREQ</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M241.5,-1284C241.5,-1284 92.5,-1284 92.5,-1284 86.5,-1284 80.5,-1278 80.5,-1272 80.5,-1272 80.5,-1250 80.5,-1250 80.5,-1244 86.5,-1238 92.5,-1238 92.5,-1238 241.5,-1238 241.5,-1238 247.5,-1238 253.5,-1244 253.5,-1250 253.5,-1250 253.5,-1272 253.5,-1272 253.5,-1278 247.5,-1284 241.5,-1284"/>
+<text text-anchor="middle" x="167" y="-1264.6" font-family="Noto Sans CJK SC" font-size="13.00">技术 · 按工单下采购计划</text>
+<text text-anchor="middle" x="167" y="-1250.6" font-family="Noto Sans CJK SC" font-size="13.00">选型、参数确定后先下发</text>
+</g>
+<!-- TECH&#45;&gt;BUYREQ -->
+<g id="chart0_edge5" class="edge">
+<title>TECH&#45;&gt;BUYREQ</title>
+<path fill="none" stroke="#586b7d" d="M242.58,-1320.87C229.74,-1310.87 214.47,-1298.97 201.02,-1288.5"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="202.41,-1286.48 195.38,-1284.11 199.4,-1290.34 202.41,-1286.48"/>
+</g>
+<!-- DRAW -->
+<g id="chart0_node7" class="node">
+<title>DRAW</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M465,-1284C465,-1284 291,-1284 291,-1284 285,-1284 279,-1278 279,-1272 279,-1272 279,-1250 279,-1250 279,-1244 285,-1238 291,-1238 291,-1238 465,-1238 465,-1238 471,-1238 477,-1244 477,-1250 477,-1250 477,-1272 477,-1272 477,-1278 471,-1284 465,-1284"/>
+<text text-anchor="middle" x="378" y="-1264.6" font-family="Noto Sans CJK SC" font-size="13.00">图纸校对、审核后下发</text>
+<text text-anchor="middle" x="378" y="-1250.6" font-family="Noto Sans CJK SC" font-size="13.00">每批随附 BOM，最后整机汇总</text>
+</g>
+<!-- TECH&#45;&gt;DRAW -->
+<g id="chart0_edge12" class="edge">
+<title>TECH&#45;&gt;DRAW</title>
+<path fill="none" stroke="#586b7d" d="M300.24,-1320.87C313.45,-1310.87 329.16,-1298.97 343,-1288.5"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="344.69,-1290.29 348.8,-1284.11 341.74,-1286.38 344.69,-1290.29"/>
+</g>
+<!-- BUY -->
+<g id="chart0_node9" class="node">
+<title>BUY</title>
+<path fill="#fff1dc" stroke="#8ba0b7" d="M252.5,-1194C252.5,-1194 71.5,-1194 71.5,-1194 65.5,-1194 59.5,-1188 59.5,-1182 59.5,-1182 59.5,-1160 59.5,-1160 59.5,-1154 65.5,-1148 71.5,-1148 71.5,-1148 252.5,-1148 252.5,-1148 258.5,-1148 264.5,-1154 264.5,-1160 264.5,-1160 264.5,-1182 264.5,-1182 264.5,-1188 258.5,-1194 252.5,-1194"/>
+<text text-anchor="middle" x="162" y="-1174.6" font-family="Noto Sans CJK SC" font-size="13.00">采购 · 分类跟进，可合并购买</text>
+<text text-anchor="middle" x="162" y="-1160.6" font-family="Noto Sans CJK SC" font-size="13.00">供应商确认周期，采购跟踪交期</text>
+</g>
+<!-- BUYREQ&#45;&gt;BUY -->
+<g id="chart0_edge6" class="edge">
+<title>BUYREQ&#45;&gt;BUY</title>
+<path fill="none" stroke="#586b7d" d="M165.74,-1237.79C165.11,-1226.75 164.34,-1213.25 163.67,-1201.36"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="166.1,-1201.05 163.26,-1194.2 161.21,-1201.33 166.1,-1201.05"/>
+</g>
+<!-- CRAFT -->
+<g id="chart0_node8" class="node">
+<title>CRAFT</title>
+<path fill="#f0ecf9" stroke="#8ba0b7" d="M456,-1201C456,-1201 300,-1201 300,-1201 294,-1201 288,-1195 288,-1189 288,-1189 288,-1153 288,-1153 288,-1147 294,-1141 300,-1141 300,-1141 456,-1141 456,-1141 462,-1141 468,-1147 468,-1153 468,-1153 468,-1189 468,-1189 468,-1195 462,-1201 456,-1201"/>
+<text text-anchor="middle" x="378" y="-1181.6" font-family="Noto Sans CJK SC" font-size="13.00">工艺 · 随批处理</text>
+<text text-anchor="middle" x="378" y="-1167.6" font-family="Noto Sans CJK SC" font-size="13.00">先下料单，再加工指导文件</text>
+<text text-anchor="middle" x="378" y="-1153.6" font-family="Noto Sans CJK SC" font-size="13.00">纸质交生产项目负责人</text>
+</g>
+<!-- DRAW&#45;&gt;CRAFT -->
+<g id="chart0_edge13" class="edge">
+<title>DRAW&#45;&gt;CRAFT</title>
+<path fill="none" stroke="#586b7d" d="M378,-1237.79C378,-1228.86 378,-1218.33 378,-1208.34"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="380.45,-1208.19 378,-1201.19 375.55,-1208.19 380.45,-1208.19"/>
+</g>
+<!-- ASSIGN -->
+<g id="chart0_node14" class="node">
+<title>ASSIGN</title>
+<path fill="#e9f0f5" stroke="#8ba0b7" d="M610,-1093C610,-1093 378,-1093 378,-1093 372,-1093 366,-1087 366,-1081 366,-1081 366,-1059 366,-1059 366,-1053 372,-1047 378,-1047 378,-1047 610,-1047 610,-1047 616,-1047 622,-1053 622,-1059 622,-1059 622,-1081 622,-1081 622,-1087 616,-1093 610,-1093"/>
+<text text-anchor="middle" x="494" y="-1073.6" font-family="Noto Sans CJK SC" font-size="13.00">统一派工负责人 · 核对并安排任务</text>
+<text text-anchor="middle" x="494" y="-1059.6" font-family="Noto Sans CJK SC" font-size="13.00">据图纸、料单和计划；班组／外协可分拆</text>
+</g>
+<!-- DRAW&#45;&gt;ASSIGN -->
+<g id="chart0_edge14" class="edge">
+<title>DRAW&#45;&gt;ASSIGN</title>
+<path fill="none" stroke="#586b7d" d="M416.27,-1237.86C445.21,-1221.12 480,-1201 480,-1201 480,-1201 498,-1123 498,-1123 498,-1123 498,-1111 498,-1111 498,-1111 497.54,-1106.42 496.94,-1100.35"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="499.37,-1100.06 496.23,-1093.34 494.49,-1100.55 499.37,-1100.06"/>
+<text text-anchor="middle" x="521.5" y="-1168.2" font-family="Noto Sans CJK SC" font-size="11.00">同时发生产</text>
+</g>
+<!-- CRAFT&#45;&gt;ASSIGN -->
+<g id="chart0_edge15" class="edge">
+<title>CRAFT&#45;&gt;ASSIGN</title>
+<path fill="none" stroke="#586b7d" d="M403.2,-1140.85C416.05,-1125.98 429,-1111 429,-1111 429,-1111 439.37,-1104.62 451.83,-1096.95"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="453.4,-1098.86 458.08,-1093.11 450.83,-1094.69 453.4,-1098.86"/>
+<text text-anchor="middle" x="463" y="-1114.2" font-family="Noto Sans CJK SC" font-size="11.00">资料随批准备</text>
+</g>
+<!-- ARR -->
+<g id="chart0_node10" class="node">
+<title>ARR</title>
+<path fill="#fff1dc" stroke="#8ba0b7" d="M233.5,-1093C233.5,-1093 90.5,-1093 90.5,-1093 84.5,-1093 78.5,-1087 78.5,-1081 78.5,-1081 78.5,-1059 78.5,-1059 78.5,-1053 84.5,-1047 90.5,-1047 90.5,-1047 233.5,-1047 233.5,-1047 239.5,-1047 245.5,-1053 245.5,-1059 245.5,-1059 245.5,-1081 245.5,-1081 245.5,-1087 239.5,-1093 233.5,-1093"/>
+<text text-anchor="middle" x="162" y="-1073.6" font-family="Noto Sans CJK SC" font-size="13.00">物流通知到货</text>
+<text text-anchor="middle" x="162" y="-1059.6" font-family="Noto Sans CJK SC" font-size="13.00">采购报检，同时通知生产</text>
+</g>
+<!-- BUY&#45;&gt;ARR -->
+<g id="chart0_edge7" class="edge">
+<title>BUY&#45;&gt;ARR</title>
+<path fill="none" stroke="#586b7d" d="M162,-1147.54C162,-1133.51 162,-1115.32 162,-1100.19"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="164.45,-1100.03 162,-1093.03 159.55,-1100.03 164.45,-1100.03"/>
+</g>
+<!-- INQ -->
+<g id="chart0_node11" class="node">
+<title>INQ</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M231,-1010C231,-1010 93,-1010 93,-1010 87,-1010 81,-1004 81,-998 81,-998 81,-986 81,-986 81,-980 87,-974 93,-974 93,-974 231,-974 231,-974 237,-974 243,-980 243,-986 243,-986 243,-998 243,-998 243,-1004 237,-1010 231,-1010"/>
+<text text-anchor="middle" x="162" y="-988.6" font-family="Noto Sans CJK SC" font-size="13.00">品质／QMS · 到料检验</text>
+</g>
+<!-- ARR&#45;&gt;INQ -->
+<g id="chart0_edge8" class="edge">
+<title>ARR&#45;&gt;INQ</title>
+<path fill="none" stroke="#586b7d" d="M162,-1046.61C162,-1037.49 162,-1026.91 162,-1017.58"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="164.45,-1017.41 162,-1010.41 159.55,-1017.41 164.45,-1017.41"/>
+</g>
+<!-- PASS -->
+<g id="chart0_node12" class="node">
+<title>PASS</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M244,-926C244,-926 12,-926 12,-926 6,-926 0,-920 0,-914 0,-914 0,-892 0,-892 0,-886 6,-880 12,-880 12,-880 244,-880 244,-880 250,-880 256,-886 256,-892 256,-892 256,-914 256,-914 256,-920 250,-926 244,-926"/>
+<text text-anchor="middle" x="128" y="-906.6" font-family="Noto Sans CJK SC" font-size="13.00">检验合格</text>
+<text text-anchor="middle" x="128" y="-892.6" font-family="Noto Sans CJK SC" font-size="13.00">生产项目负责人核用料，班组按工单领料</text>
+</g>
+<!-- INQ&#45;&gt;PASS -->
+<g id="chart0_edge9" class="edge">
+<title>INQ&#45;&gt;PASS</title>
+<path fill="none" stroke="#586b7d" d="M155.28,-973.81C150.73,-962.17 144.61,-946.51 139.32,-932.97"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="141.47,-931.74 136.64,-926.11 136.91,-933.52 141.47,-931.74"/>
+<text text-anchor="middle" x="160.5" y="-947.2" font-family="Noto Sans CJK SC" font-size="11.00">合格</text>
+</g>
+<!-- REPLACE -->
+<g id="chart0_node13" class="node">
+<title>REPLACE</title>
+<path fill="#fff1dc" stroke="#8ba0b7" d="M447,-926C447,-926 291,-926 291,-926 285,-926 279,-920 279,-914 279,-914 279,-892 279,-892 279,-886 285,-880 291,-880 291,-880 447,-880 447,-880 453,-880 459,-886 459,-892 459,-892 459,-914 459,-914 459,-920 453,-926 447,-926"/>
+<text text-anchor="middle" x="369" y="-906.6" font-family="Noto Sans CJK SC" font-size="13.00">不合格：品质提出处理意见</text>
+<text text-anchor="middle" x="369" y="-892.6" font-family="Noto Sans CJK SC" font-size="13.00">采购联系供应商退换／整改</text>
+</g>
+<!-- INQ&#45;&gt;REPLACE -->
+<g id="chart0_edge10" class="edge">
+<title>INQ&#45;&gt;REPLACE</title>
+<path fill="none" stroke="#586b7d" d="M202.9,-973.81C233.38,-961 275.48,-943.31 309.66,-928.94"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="310.88,-931.08 316.39,-926.11 308.99,-926.57 310.88,-931.08"/>
+<text text-anchor="middle" x="289" y="-947.2" font-family="Noto Sans CJK SC" font-size="11.00">不合格</text>
+</g>
+<!-- PROD -->
+<g id="chart0_node15" class="node">
+<title>PROD</title>
+<path fill="#e9f0f5" stroke="#8ba0b7" d="M420.5,-832C420.5,-832 201.5,-832 201.5,-832 195.5,-832 189.5,-826 189.5,-820 189.5,-820 189.5,-784 189.5,-784 189.5,-778 195.5,-772 201.5,-772 201.5,-772 420.5,-772 420.5,-772 426.5,-772 432.5,-778 432.5,-784 432.5,-784 432.5,-820 432.5,-820 432.5,-826 426.5,-832 420.5,-832"/>
+<text text-anchor="middle" x="311" y="-812.6" font-family="Noto Sans CJK SC" font-size="13.00">生产执行 · 分批制造、交接</text>
+<text text-anchor="middle" x="311" y="-798.6" font-family="Noto Sans CJK SC" font-size="13.00">项目负责人交底、跟踪进度与预计完工</text>
+<text text-anchor="middle" x="311" y="-784.6" font-family="Noto Sans CJK SC" font-size="13.00">按明确质量节点及同批接收范围放行</text>
+</g>
+<!-- PASS&#45;&gt;PROD -->
+<g id="chart0_edge17" class="edge">
+<title>PASS&#45;&gt;PROD</title>
+<path fill="none" stroke="#586b7d" d="M169.07,-879.78C193.17,-866.75 224.05,-850.04 250.85,-835.54"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="252.22,-837.58 257.21,-832.1 249.89,-833.27 252.22,-837.58"/>
+<text text-anchor="middle" x="271" y="-853.2" font-family="Noto Sans CJK SC" font-size="11.00">所需用料合格可领用</text>
+</g>
+<!-- REPLACE&#45;&gt;ARR -->
+<g id="chart0_edge11" class="edge">
+<title>REPLACE&#45;&gt;ARR</title>
+<path fill="none" stroke="#586b7d" d="M344.89,-926.22C311.17,-957.3 254,-1010 254,-1010 254,-1010 227.34,-1027.1 202.72,-1042.89"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="201.09,-1041.02 196.52,-1046.86 203.73,-1045.15 201.09,-1041.02"/>
+<text text-anchor="middle" x="316" y="-989.2" font-family="Noto Sans CJK SC" font-size="11.00">重新到货</text>
+</g>
+<!-- ASSIGN&#45;&gt;PROD -->
+<g id="chart0_edge16" class="edge">
+<title>ASSIGN&#45;&gt;PROD</title>
+<path fill="none" stroke="#586b7d" d="M491.32,-1046.95C485.25,-997.09 471,-880 471,-880 471,-880 421.76,-856.3 377.91,-835.2"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="378.86,-832.94 371.49,-832.11 376.73,-837.35 378.86,-832.94"/>
+</g>
+<!-- ASSEMB -->
+<g id="chart0_node16" class="node">
+<title>ASSEMB</title>
+<path fill="#e9f0f5" stroke="#8ba0b7" d="M321.5,-724C321.5,-724 178.5,-724 178.5,-724 172.5,-724 166.5,-718 166.5,-712 166.5,-712 166.5,-690 166.5,-690 166.5,-684 172.5,-678 178.5,-678 178.5,-678 321.5,-678 321.5,-678 327.5,-678 333.5,-684 333.5,-690 333.5,-690 333.5,-712 333.5,-712 333.5,-718 327.5,-724 321.5,-724"/>
+<text text-anchor="middle" x="250" y="-704.6" font-family="Noto Sans CJK SC" font-size="13.00">总装 · 专门班组</text>
+<text text-anchor="middle" x="250" y="-690.6" font-family="Noto Sans CJK SC" font-size="13.00">生产项目负责人直接协调</text>
+</g>
+<!-- PROD&#45;&gt;ASSEMB -->
+<g id="chart0_edge18" class="edge">
+<title>PROD&#45;&gt;ASSEMB</title>
+<path fill="none" stroke="#586b7d" d="M293.03,-771.83C284.93,-758.7 275.42,-743.25 267.39,-730.23"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="269.34,-728.72 263.59,-724.05 265.17,-731.29 269.34,-728.72"/>
+</g>
+<!-- BATCH -->
+<g id="chart0_node20" class="node">
+<title>BATCH</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M457,-660C457,-660 289,-660 289,-660 283,-660 277,-654 277,-648 277,-648 277,-626 277,-626 277,-620 283,-614 289,-614 289,-614 457,-614 457,-614 463,-614 469,-620 469,-626 469,-626 469,-648 469,-648 469,-654 463,-660 457,-660"/>
+<text text-anchor="middle" x="373" y="-640.6" font-family="Noto Sans CJK SC" font-size="13.00">分批部件发运路径</text>
+<text text-anchor="middle" x="373" y="-626.6" font-family="Noto Sans CJK SC" font-size="13.00">品质按本批部件检验结果放行</text>
+</g>
+<!-- PROD&#45;&gt;BATCH -->
+<g id="chart0_edge24" class="edge">
+<title>PROD&#45;&gt;BATCH</title>
+<path fill="none" stroke="#586b7d" d="M323.85,-771.89C333.48,-750.08 345,-724 345,-724 345,-724 355.44,-691.94 363.57,-666.97"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="365.95,-667.56 365.79,-660.15 361.29,-666.04 365.95,-667.56"/>
+<text text-anchor="middle" x="382.5" y="-745.2" font-family="Noto Sans CJK SC" font-size="11.00">适用分批部件放行</text>
+</g>
+<!-- DEBUG -->
+<g id="chart0_node17" class="node">
+<title>DEBUG</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M323,-596C323,-596 167,-596 167,-596 161,-596 155,-590 155,-584 155,-584 155,-562 155,-562 155,-556 161,-550 167,-550 167,-550 323,-550 323,-550 329,-550 335,-556 335,-562 335,-562 335,-584 335,-584 335,-590 329,-596 323,-596"/>
+<text text-anchor="middle" x="245" y="-576.6" font-family="Noto Sans CJK SC" font-size="13.00">技术调试后通知品质</text>
+<text text-anchor="middle" x="245" y="-562.6" font-family="Noto Sans CJK SC" font-size="13.00">技术主导调试，生产配合</text>
+</g>
+<!-- ASSEMB&#45;&gt;DEBUG -->
+<g id="chart0_edge19" class="edge">
+<title>ASSEMB&#45;&gt;DEBUG</title>
+<path fill="none" stroke="#586b7d" d="M249.12,-677.76C248.29,-656.98 247.06,-625.83 246.15,-603.08"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="248.6,-602.91 245.87,-596.01 243.7,-603.11 248.6,-602.91"/>
+</g>
+<!-- ACCEPT -->
+<g id="chart0_node18" class="node">
+<title>ACCEPT</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M328,-513C328,-513 134,-513 134,-513 128,-513 122,-507 122,-501 122,-501 122,-479 122,-479 122,-473 128,-467 134,-467 134,-467 328,-467 328,-467 334,-467 340,-473 340,-479 340,-479 340,-501 340,-501 340,-507 334,-513 328,-513"/>
+<text text-anchor="middle" x="231" y="-493.6" font-family="Noto Sans CJK SC" font-size="13.00">品质／QMS · 厂内验收</text>
+<text text-anchor="middle" x="231" y="-479.6" font-family="Noto Sans CJK SC" font-size="13.00">合同、技术协议、图纸、验收大纲</text>
+</g>
+<!-- DEBUG&#45;&gt;ACCEPT -->
+<g id="chart0_edge20" class="edge">
+<title>DEBUG&#45;&gt;ACCEPT</title>
+<path fill="none" stroke="#586b7d" d="M241.17,-549.87C239.58,-540.67 237.72,-529.87 236.02,-520.05"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="238.43,-519.59 234.82,-513.11 233.6,-520.42 238.43,-519.59"/>
+</g>
+<!-- FIX -->
+<g id="chart0_node19" class="node">
+<title>FIX</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M224.5,-419C224.5,-419 75.5,-419 75.5,-419 69.5,-419 63.5,-413 63.5,-407 63.5,-407 63.5,-385 63.5,-385 63.5,-379 69.5,-373 75.5,-373 75.5,-373 224.5,-373 224.5,-373 230.5,-373 236.5,-379 236.5,-385 236.5,-385 236.5,-407 236.5,-407 236.5,-413 230.5,-419 224.5,-419"/>
+<text text-anchor="middle" x="150" y="-399.6" font-family="Noto Sans CJK SC" font-size="13.00">整改清单 → 责任部门处理</text>
+<text text-anchor="middle" x="150" y="-385.6" font-family="Noto Sans CJK SC" font-size="13.00">品质复验</text>
+</g>
+<!-- ACCEPT&#45;&gt;FIX -->
+<g id="chart0_edge21" class="edge">
+<title>ACCEPT&#45;&gt;FIX</title>
+<path fill="none" stroke="#586b7d" d="M203.37,-466.89C191.8,-457.64 181,-449 181,-449 181,-449 174.05,-437.35 166.74,-425.08"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="168.84,-423.81 163.15,-419.05 164.63,-426.32 168.84,-423.81"/>
+<text text-anchor="middle" x="198" y="-440.2" font-family="Noto Sans CJK SC" font-size="11.00">需整改</text>
+</g>
+<!-- RELEASE -->
+<g id="chart0_node21" class="node">
+<title>RELEASE</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M478.5,-419C478.5,-419 271.5,-419 271.5,-419 265.5,-419 259.5,-413 259.5,-407 259.5,-407 259.5,-385 259.5,-385 259.5,-379 265.5,-373 271.5,-373 271.5,-373 478.5,-373 478.5,-373 484.5,-373 490.5,-379 490.5,-385 490.5,-385 490.5,-407 490.5,-407 490.5,-413 484.5,-419 478.5,-419"/>
+<text text-anchor="middle" x="375" y="-399.6" font-family="Noto Sans CJK SC" font-size="13.00">品质确认发运放行</text>
+<text text-anchor="middle" x="375" y="-385.6" font-family="Noto Sans CJK SC" font-size="13.00">可按批部件放行，或整机验收后分批</text>
+</g>
+<!-- ACCEPT&#45;&gt;RELEASE -->
+<g id="chart0_edge23" class="edge">
+<title>ACCEPT&#45;&gt;RELEASE</title>
+<path fill="none" stroke="#586b7d" d="M236.09,-466.95C239.36,-452.77 243,-437 243,-437 243,-437 267.45,-429.59 295.3,-421.15"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="296.06,-423.48 302.05,-419.11 294.64,-418.79 296.06,-423.48"/>
+<text text-anchor="middle" x="266" y="-440.2" font-family="Noto Sans CJK SC" font-size="11.00">验收通过</text>
+</g>
+<!-- FIX&#45;&gt;ACCEPT -->
+<g id="chart0_edge22" class="edge">
+<title>FIX&#45;&gt;ACCEPT</title>
+<path fill="none" stroke="#586b7d" d="M229.58,-419.11C262.88,-428.36 294,-437 294,-437 294,-437 294,-449 294,-449 294,-449 283.95,-455.38 271.87,-463.05"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="270.41,-461.07 265.82,-466.89 273.04,-465.21 270.41,-461.07"/>
+<text text-anchor="middle" x="305.5" y="-440.2" font-family="Noto Sans CJK SC" font-size="11.00">复验</text>
+</g>
+<!-- BATCH&#45;&gt;RELEASE -->
+<g id="chart0_edge25" class="edge">
+<title>BATCH&#45;&gt;RELEASE</title>
+<path fill="none" stroke="#586b7d" d="M373.18,-613.94C373.55,-570.64 374.35,-474.5 374.76,-426.07"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="377.21,-426.02 374.82,-419 372.31,-425.98 377.21,-426.02"/>
+</g>
+<!-- SHIP -->
+<g id="chart0_node22" class="node">
+<title>SHIP</title>
+<path fill="#e9f0f5" stroke="#8ba0b7" d="M478.5,-336C478.5,-336 271.5,-336 271.5,-336 265.5,-336 259.5,-330 259.5,-324 259.5,-324 259.5,-288 259.5,-288 259.5,-282 265.5,-276 271.5,-276 271.5,-276 478.5,-276 478.5,-276 484.5,-276 490.5,-282 490.5,-288 490.5,-288 490.5,-324 490.5,-324 490.5,-330 484.5,-336 478.5,-336"/>
+<text text-anchor="middle" x="375" y="-316.6" font-family="Noto Sans CJK SC" font-size="13.00">生产 · 拆解、包装、分批装车</text>
+<text text-anchor="middle" x="375" y="-302.6" font-family="Noto Sans CJK SC" font-size="13.00">技术整机总清单，生产注明本批</text>
+<text text-anchor="middle" x="375" y="-288.6" font-family="Noto Sans CJK SC" font-size="13.00">生产＋品质核对，项目负责人记装车</text>
+</g>
+<!-- RELEASE&#45;&gt;SHIP -->
+<g id="chart0_edge26" class="edge">
+<title>RELEASE&#45;&gt;SHIP</title>
+<path fill="none" stroke="#586b7d" d="M375,-372.79C375,-363.86 375,-353.33 375,-343.34"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="377.45,-343.19 375,-336.19 372.55,-343.19 377.45,-343.19"/>
+</g>
+<!-- SITE -->
+<g id="chart0_node23" class="node">
+<title>SITE</title>
+<path fill="#e6f3f8" stroke="#8ba0b7" d="M491,-216C491,-216 259,-216 259,-216 253,-216 247,-210 247,-204 247,-204 247,-168 247,-168 247,-162 253,-156 259,-156 259,-156 491,-156 491,-156 497,-156 503,-162 503,-168 503,-168 503,-204 503,-204 503,-210 497,-216 491,-216"/>
+<text text-anchor="middle" x="375" y="-196.6" font-family="Noto Sans CJK SC" font-size="13.00">现场收货、安装、调试、培训</text>
+<text text-anchor="middle" x="375" y="-182.6" font-family="Noto Sans CJK SC" font-size="13.00">车辆售后／路桥安装公司／模具生产</text>
+<text text-anchor="middle" x="375" y="-168.6" font-family="Noto Sans CJK SC" font-size="13.00">现场负责人核清单，反馈进展和预计时间</text>
+</g>
+<!-- SHIP&#45;&gt;SITE -->
+<g id="chart0_edge27" class="edge">
+<title>SHIP&#45;&gt;SITE</title>
+<path fill="none" stroke="#586b7d" d="M375,-275.83C375,-259.95 375,-240.15 375,-223.27"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="377.45,-223.24 375,-216.24 372.55,-223.24 377.45,-223.24"/>
+</g>
+<!-- SITE&#45;&gt;SHIP -->
+<g id="chart0_edge30" class="edge">
+<title>SITE&#45;&gt;SHIP</title>
+<path fill="none" stroke="#176581" stroke-dasharray="5,2" d="M383.09,-216.23C385.73,-225.79 388,-234 388,-234 388,-234 388,-258 388,-258 388,-258 386.72,-262.62 384.97,-268.96"/>
+<polygon fill="#176581" stroke="#176581" points="382.59,-268.37 383.09,-275.77 387.31,-269.68 382.59,-268.37"/>
+<text text-anchor="middle" x="444.5" y="-249.2" font-family="Noto Sans CJK SC" font-size="11.00">下一批内容／日期需求</text>
+<text text-anchor="middle" x="444.5" y="-237.2" font-family="Noto Sans CJK SC" font-size="11.00">生产反馈安排</text>
+</g>
+<!-- SIGN -->
+<g id="chart0_node24" class="node">
+<title>SIGN</title>
+<path fill="#eef0fa" stroke="#8ba0b7" d="M465,-119C465,-119 285,-119 285,-119 279,-119 273,-113 273,-107 273,-107 273,-85 273,-85 273,-79 279,-73 285,-73 285,-73 465,-73 465,-73 471,-73 477,-79 477,-85 477,-85 477,-107 477,-107 477,-113 471,-119 465,-119"/>
+<text text-anchor="middle" x="375" y="-99.6" font-family="Noto Sans CJK SC" font-size="13.00">客户签字验收</text>
+<text text-anchor="middle" x="375" y="-85.6" font-family="Noto Sans CJK SC" font-size="13.00">销售关联签字依据，逐工单记录结果</text>
+</g>
+<!-- SITE&#45;&gt;SIGN -->
+<g id="chart0_edge28" class="edge">
+<title>SITE&#45;&gt;SIGN</title>
+<path fill="none" stroke="#586b7d" d="M375,-155.7C375,-146.21 375,-135.7 375,-126.23"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="377.45,-126.21 375,-119.21 372.55,-126.22 377.45,-126.21"/>
+</g>
+<!-- DONE -->
+<g id="chart0_node25" class="node">
+<title>DONE</title>
+<path fill="#ccebdc" stroke="#237a55" stroke-width="2" d="M414.5,-36C414.5,-36 335.5,-36 335.5,-36 329.5,-36 323.5,-30 323.5,-24 323.5,-24 323.5,-12 323.5,-12 323.5,-6 329.5,0 335.5,0 335.5,0 414.5,0 414.5,0 420.5,0 426.5,-6 426.5,-12 426.5,-12 426.5,-24 426.5,-24 426.5,-30 420.5,-36 414.5,-36"/>
+<text text-anchor="middle" x="375" y="-14.6" font-family="Noto Sans CJK SC" font-size="13.00">工单履约完成</text>
+</g>
+<!-- SIGN&#45;&gt;DONE -->
+<g id="chart0_edge29" class="edge">
+<title>SIGN&#45;&gt;DONE</title>
+<path fill="none" stroke="#586b7d" d="M375,-72.61C375,-63.49 375,-52.91 375,-43.58"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="377.45,-43.41 375,-36.41 372.55,-43.41 377.45,-43.41"/>
+</g>
+</g>
+</svg>
+</div></div><p class="note">总装调试、整机验收是整机路径；适用部件可按批检验放行发运。现场需求驱动后续批次，销售登记签字依据及逐设备通过结果即工单履约完成，不要求项目部再次确认。项目部另核对全部工单及合同范围，遗留有责任人、期限、承接部门可带遗留关闭，关闭后继续跟踪。</p></section><section class="panel" id="p1" hidden><h2>生产与外协流转</h2><p class="intro">同一工单可整包派工、拆分执行和分批交接。</p><div class="viewer"><div class="drawing"><svg width="893pt" height="1415pt"
+ viewBox="0.00 0.00 892.50 1415.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="chart1_graph0" class="graph" transform="scale(1 1) rotate(0) translate(18 1397)">
+<title>production</title>
+<polygon fill="white" stroke="transparent" points="-18,18 -18,-1397 874.5,-1397 874.5,18 -18,18"/>
+<!-- PLAN -->
+<g id="chart1_node1" class="node">
+<title>PLAN</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M406,-1379C406,-1379 199,-1379 199,-1379 193,-1379 187,-1373 187,-1367 187,-1367 187,-1345 187,-1345 187,-1339 193,-1333 199,-1333 199,-1333 406,-1333 406,-1333 412,-1333 418,-1339 418,-1345 418,-1345 418,-1367 418,-1367 418,-1373 412,-1379 406,-1379"/>
+<text text-anchor="middle" x="302.5" y="-1359.6" font-family="Noto Sans CJK SC" font-size="13.00">工单计划＋图纸／BOM＋料单</text>
+<text text-anchor="middle" x="302.5" y="-1345.6" font-family="Noto Sans CJK SC" font-size="13.00">工序顺序：项目部提出、生产部确认</text>
+</g>
+<!-- PACK -->
+<g id="chart1_node2" class="node">
+<title>PACK</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M412,-1296C412,-1296 193,-1296 193,-1296 187,-1296 181,-1290 181,-1284 181,-1284 181,-1248 181,-1248 181,-1242 187,-1236 193,-1236 193,-1236 412,-1236 412,-1236 418,-1236 424,-1242 424,-1248 424,-1248 424,-1284 424,-1284 424,-1290 418,-1296 412,-1296"/>
+<text text-anchor="middle" x="302.5" y="-1276.6" font-family="Noto Sans CJK SC" font-size="13.00">统一派工负责人核对需求并指定执行方</text>
+<text text-anchor="middle" x="302.5" y="-1262.6" font-family="Noto Sans CJK SC" font-size="13.00">仅同工单、同工序，多图号整包安排</text>
+<text text-anchor="middle" x="302.5" y="-1248.6" font-family="Noto Sans CJK SC" font-size="13.00">可提前指定，也可快完工时安排</text>
+</g>
+<!-- PLAN&#45;&gt;PACK -->
+<g id="chart1_edge1" class="edge">
+<title>PLAN&#45;&gt;PACK</title>
+<path fill="none" stroke="#586b7d" d="M302.5,-1332.79C302.5,-1323.86 302.5,-1313.33 302.5,-1303.34"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="304.95,-1303.19 302.5,-1296.19 300.05,-1303.19 304.95,-1303.19"/>
+</g>
+<!-- WORK -->
+<g id="chart1_node3" class="node">
+<title>WORK</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M445,-1199C445,-1199 160,-1199 160,-1199 154,-1199 148,-1193 148,-1187 148,-1187 148,-1151 148,-1151 148,-1145 154,-1139 160,-1139 160,-1139 445,-1139 445,-1139 451,-1139 457,-1145 457,-1151 457,-1151 457,-1187 457,-1187 457,-1193 451,-1199 445,-1199"/>
+<text text-anchor="middle" x="302.5" y="-1179.6" font-family="Noto Sans CJK SC" font-size="13.00">按适用工序执行</text>
+<text text-anchor="middle" x="302.5" y="-1165.6" font-family="Noto Sans CJK SC" font-size="13.00">下料 → 组对焊接 → 机加工（如需要）→ 表面处理</text>
+<text text-anchor="middle" x="302.5" y="-1151.6" font-family="Noto Sans CJK SC" font-size="13.00">各道工序分别指定班组或外协</text>
+</g>
+<!-- PACK&#45;&gt;WORK -->
+<g id="chart1_edge2" class="edge">
+<title>PACK&#45;&gt;WORK</title>
+<path fill="none" stroke="#586b7d" d="M302.5,-1235.98C302.5,-1226.58 302.5,-1216.04 302.5,-1206.19"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="304.95,-1206.17 302.5,-1199.17 300.05,-1206.17 304.95,-1206.17"/>
+</g>
+<!-- PROGRESS -->
+<g id="chart1_node4" class="node">
+<title>PROGRESS</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M393,-1102C393,-1102 212,-1102 212,-1102 206,-1102 200,-1096 200,-1090 200,-1090 200,-1054 200,-1054 200,-1048 206,-1042 212,-1042 212,-1042 393,-1042 393,-1042 399,-1042 405,-1048 405,-1054 405,-1054 405,-1090 405,-1090 405,-1096 399,-1102 393,-1102"/>
+<text text-anchor="middle" x="302.5" y="-1082.6" font-family="Noto Sans CJK SC" font-size="13.00">生产项目负责人跟进各图号进展</text>
+<text text-anchor="middle" x="302.5" y="-1068.6" font-family="Noto Sans CJK SC" font-size="13.00">实际完工依据班组长反馈</text>
+<text text-anchor="middle" x="302.5" y="-1054.6" font-family="Noto Sans CJK SC" font-size="13.00">更新预计完工，异常另行协调</text>
+</g>
+<!-- WORK&#45;&gt;PROGRESS -->
+<g id="chart1_edge3" class="edge">
+<title>WORK&#45;&gt;PROGRESS</title>
+<path fill="none" stroke="#586b7d" d="M302.5,-1138.98C302.5,-1129.58 302.5,-1119.04 302.5,-1109.19"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="304.95,-1109.17 302.5,-1102.17 300.05,-1109.17 304.95,-1109.17"/>
+</g>
+<!-- FIN -->
+<g id="chart1_node5" class="node">
+<title>FIN</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M406,-1005C406,-1005 199,-1005 199,-1005 193,-1005 187,-999 187,-993 187,-993 187,-981 187,-981 187,-975 193,-969 199,-969 199,-969 406,-969 406,-969 412,-969 418,-975 418,-981 418,-981 418,-993 418,-993 418,-999 412,-1005 406,-1005"/>
+<text text-anchor="middle" x="302.5" y="-983.6" font-family="Noto Sans CJK SC" font-size="13.00">某部件／某批数量达到工序完成节点</text>
+</g>
+<!-- PROGRESS&#45;&gt;FIN -->
+<g id="chart1_edge4" class="edge">
+<title>PROGRESS&#45;&gt;FIN</title>
+<path fill="none" stroke="#586b7d" d="M302.5,-1041.97C302.5,-1032.23 302.5,-1021.48 302.5,-1012.16"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="304.95,-1012.03 302.5,-1005.03 300.05,-1012.03 304.95,-1012.03"/>
+</g>
+<!-- LOCATION -->
+<g id="chart1_node6" class="node">
+<title>LOCATION</title>
+<path fill="#e6f3f8" stroke="#8ba0b7" d="M290.8,-929.34C290.8,-929.34 173.2,-902.66 173.2,-902.66 167.35,-901.33 167.35,-898.67 173.2,-897.34 173.2,-897.34 290.8,-870.66 290.8,-870.66 296.65,-869.33 308.35,-869.33 314.2,-870.66 314.2,-870.66 431.8,-897.34 431.8,-897.34 437.65,-898.67 437.65,-901.33 431.8,-902.66 431.8,-902.66 314.2,-929.34 314.2,-929.34 308.35,-930.67 296.65,-930.67 290.8,-929.34"/>
+<text text-anchor="middle" x="302.5" y="-896.6" font-family="Noto Sans CJK SC" font-size="13.00">完工部件所在路径？</text>
+</g>
+<!-- FIN&#45;&gt;LOCATION -->
+<g id="chart1_edge5" class="edge">
+<title>FIN&#45;&gt;LOCATION</title>
+<path fill="none" stroke="#586b7d" d="M302.5,-968.8C302.5,-960.29 302.5,-949.64 302.5,-939.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="304.95,-939.27 302.5,-932.27 300.05,-939.27 304.95,-939.27"/>
+</g>
+<!-- SITEPATH -->
+<g id="chart1_node7" class="node">
+<title>SITEPATH</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M347,-813C347,-813 140,-813 140,-813 134,-813 128,-807 128,-801 128,-801 128,-779 128,-779 128,-773 134,-767 140,-767 140,-767 347,-767 347,-767 353,-767 359,-773 359,-779 359,-779 359,-801 359,-801 359,-807 353,-813 347,-813"/>
+<text text-anchor="middle" x="243.5" y="-793.6" font-family="Noto Sans CJK SC" font-size="13.00">厂内制作：在厂</text>
+<text text-anchor="middle" x="243.5" y="-779.6" font-family="Noto Sans CJK SC" font-size="13.00">外协直送：先保留在原外协等待放行</text>
+</g>
+<!-- LOCATION&#45;&gt;SITEPATH -->
+<g id="chart1_edge7" class="edge">
+<title>LOCATION&#45;&gt;SITEPATH</title>
+<path fill="none" stroke="#586b7d" d="M287.31,-871.19C278.63,-855.3 267.76,-835.41 259.03,-819.42"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="261.18,-818.25 255.67,-813.28 256.88,-820.6 261.18,-818.25"/>
+<text text-anchor="middle" x="315" y="-841.2" font-family="Noto Sans CJK SC" font-size="11.00">厂内／外协现场</text>
+</g>
+<!-- RETURN -->
+<g id="chart1_node16" class="node">
+<title>RETURN</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M537,-820C537,-820 394,-820 394,-820 388,-820 382,-814 382,-808 382,-808 382,-772 382,-772 382,-766 388,-760 394,-760 394,-760 537,-760 537,-760 543,-760 549,-766 549,-772 549,-772 549,-808 549,-808 549,-814 543,-820 537,-820"/>
+<text text-anchor="middle" x="465.5" y="-800.6" font-family="Noto Sans CJK SC" font-size="13.00">外协返回工厂</text>
+<text text-anchor="middle" x="465.5" y="-786.6" font-family="Noto Sans CJK SC" font-size="13.00">项目负责人核图号、数量</text>
+<text text-anchor="middle" x="465.5" y="-772.6" font-family="Noto Sans CJK SC" font-size="13.00">送出与返回分别留记录</text>
+</g>
+<!-- LOCATION&#45;&gt;RETURN -->
+<g id="chart1_edge6" class="edge">
+<title>LOCATION&#45;&gt;RETURN</title>
+<path fill="none" stroke="#586b7d" d="M337.47,-875.83C360.24,-860.74 390.31,-840.82 415.59,-824.07"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="417.08,-826.02 421.57,-820.11 414.38,-821.93 417.08,-826.02"/>
+<text text-anchor="middle" x="422" y="-841.2" font-family="Noto Sans CJK SC" font-size="11.00">外协先回厂</text>
+</g>
+<!-- NEED -->
+<g id="chart1_node8" class="node">
+<title>NEED</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M342.54,-718.11C342.54,-718.11 261.46,-681.89 261.46,-681.89 255.98,-679.45 255.98,-674.55 261.46,-672.11 261.46,-672.11 342.54,-635.89 342.54,-635.89 348.02,-633.45 358.98,-633.45 364.46,-635.89 364.46,-635.89 445.54,-672.11 445.54,-672.11 451.02,-674.55 451.02,-679.45 445.54,-681.89 445.54,-681.89 364.46,-718.11 364.46,-718.11 358.98,-720.55 348.02,-720.55 342.54,-718.11"/>
+<text text-anchor="middle" x="353.5" y="-680.6" font-family="Noto Sans CJK SC" font-size="13.00">本次转序</text>
+<text text-anchor="middle" x="353.5" y="-666.6" font-family="Noto Sans CJK SC" font-size="13.00">需质量放行？</text>
+</g>
+<!-- SITEPATH&#45;&gt;NEED -->
+<g id="chart1_edge9" class="edge">
+<title>SITEPATH&#45;&gt;NEED</title>
+<path fill="none" stroke="#586b7d" d="M265.5,-766.8C280.27,-751.9 300.08,-731.9 317.17,-714.66"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="319.19,-716.1 322.38,-709.41 315.71,-712.65 319.19,-716.1"/>
+</g>
+<!-- Q -->
+<g id="chart1_node9" class="node">
+<title>Q</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M433,-583C433,-583 226,-583 226,-583 220,-583 214,-577 214,-571 214,-571 214,-549 214,-549 214,-543 220,-537 226,-537 226,-537 433,-537 433,-537 439,-537 445,-543 445,-549 445,-549 445,-571 445,-571 445,-577 439,-583 433,-583"/>
+<text text-anchor="middle" x="329.5" y="-563.6" font-family="Noto Sans CJK SC" font-size="13.00">QMS 报检与品质检验</text>
+<text text-anchor="middle" x="329.5" y="-549.6" font-family="Noto Sans CJK SC" font-size="13.00">厂内／回厂检验，或品质到外协现场</text>
+</g>
+<!-- NEED&#45;&gt;Q -->
+<g id="chart1_edge10" class="edge">
+<title>NEED&#45;&gt;Q</title>
+<path fill="none" stroke="#586b7d" d="M344.9,-634.81C341.84,-620.12 338.45,-603.9 335.64,-590.4"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="337.97,-589.57 334.14,-583.22 333.17,-590.57 337.97,-589.57"/>
+<text text-anchor="middle" x="402.5" y="-604.2" font-family="Noto Sans CJK SC" font-size="11.00">是：按明确的质量放行节点</text>
+</g>
+<!-- TRANSFER -->
+<g id="chart1_node14" class="node">
+<title>TRANSFER</title>
+<path fill="#e6f3f8" stroke="#8ba0b7" d="M480.93,-345.81C480.93,-345.81 388.07,-320.19 388.07,-320.19 382.28,-318.6 382.28,-315.4 388.07,-313.81 388.07,-313.81 480.93,-288.19 480.93,-288.19 486.72,-286.6 498.28,-286.6 504.07,-288.19 504.07,-288.19 596.93,-313.81 596.93,-313.81 602.72,-315.4 602.72,-318.6 596.93,-320.19 596.93,-320.19 504.07,-345.81 504.07,-345.81 498.28,-347.4 486.72,-347.4 480.93,-345.81"/>
+<text text-anchor="middle" x="492.5" y="-313.6" font-family="Noto Sans CJK SC" font-size="13.00">实际交接路径？</text>
+</g>
+<!-- NEED&#45;&gt;TRANSFER -->
+<g id="chart1_edge11" class="edge">
+<title>NEED&#45;&gt;TRANSFER</title>
+<path fill="none" stroke="#586b7d" d="M399.01,-651.28C431.51,-633.63 469.5,-613 469.5,-613 469.5,-613 483.34,-435.47 489.55,-355.85"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="492.02,-355.63 490.13,-348.46 487.14,-355.25 492.02,-355.63"/>
+<text text-anchor="middle" x="511.5" y="-510.2" font-family="Noto Sans CJK SC" font-size="11.00">无需本次检验</text>
+</g>
+<!-- DEC -->
+<g id="chart1_node10" class="node">
+<title>DEC</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M267.81,-483.54C267.81,-483.54 199.19,-448.46 199.19,-448.46 193.84,-445.73 193.84,-440.27 199.19,-437.54 199.19,-437.54 267.81,-402.46 267.81,-402.46 273.16,-399.73 283.84,-399.73 289.19,-402.46 289.19,-402.46 357.81,-437.54 357.81,-437.54 363.16,-440.27 363.16,-445.73 357.81,-448.46 357.81,-448.46 289.19,-483.54 289.19,-483.54 283.84,-486.27 273.16,-486.27 267.81,-483.54"/>
+<text text-anchor="middle" x="278.5" y="-446.6" font-family="Noto Sans CJK SC" font-size="13.00">合格数量？</text>
+<text text-anchor="middle" x="278.5" y="-432.6" font-family="Noto Sans CJK SC" font-size="13.00">可部分合格</text>
+</g>
+<!-- Q&#45;&gt;DEC -->
+<g id="chart1_edge12" class="edge">
+<title>Q&#45;&gt;DEC</title>
+<path fill="none" stroke="#586b7d" d="M319.67,-536.83C313.48,-522.88 305.29,-504.41 297.85,-487.62"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="300,-486.45 294.93,-481.04 295.52,-488.43 300,-486.45"/>
+</g>
+<!-- BAD -->
+<g id="chart1_node11" class="node">
+<title>BAD</title>
+<path fill="#fff1dc" stroke="#8ba0b7" d="M292,-335C292,-335 111,-335 111,-335 105,-335 99,-329 99,-323 99,-323 99,-311 99,-311 99,-305 105,-299 111,-299 111,-299 292,-299 292,-299 298,-299 304,-305 304,-311 304,-311 304,-323 304,-323 304,-329 298,-335 292,-335"/>
+<text text-anchor="middle" x="201.5" y="-313.6" font-family="Noto Sans CJK SC" font-size="13.00">不合格部分：品质确定处理方式</text>
+</g>
+<!-- DEC&#45;&gt;BAD -->
+<g id="chart1_edge14" class="edge">
+<title>DEC&#45;&gt;BAD</title>
+<path fill="none" stroke="#586b7d" d="M244.5,-414.18C223.88,-397.31 201.5,-379 201.5,-379 201.5,-379 201.5,-359.36 201.5,-342.37"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="203.95,-342.32 201.5,-335.32 199.05,-342.32 203.95,-342.32"/>
+<text text-anchor="middle" x="230" y="-370.2" font-family="Noto Sans CJK SC" font-size="11.00">不合格部分</text>
+</g>
+<!-- DEC&#45;&gt;TRANSFER -->
+<g id="chart1_edge13" class="edge">
+<title>DEC&#45;&gt;TRANSFER</title>
+<path fill="none" stroke="#586b7d" d="M283.06,-399.24C284.86,-382.4 286.5,-367 286.5,-367 286.5,-367 365.12,-348.3 425.22,-334"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="425.84,-336.37 432.09,-332.37 424.71,-331.61 425.84,-336.37"/>
+<text text-anchor="middle" x="309.5" y="-370.2" font-family="Noto Sans CJK SC" font-size="11.00">合格部分</text>
+</g>
+<!-- OUTFIX -->
+<g id="chart1_node12" class="node">
+<title>OUTFIX</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M129,-230C129,-230 12,-230 12,-230 6,-230 0,-224 0,-218 0,-218 0,-196 0,-196 0,-190 6,-184 12,-184 12,-184 129,-184 129,-184 135,-184 141,-190 141,-196 141,-196 141,-218 141,-218 141,-224 135,-230 129,-230"/>
+<text text-anchor="middle" x="70.5" y="-210.6" font-family="Noto Sans CJK SC" font-size="13.00">退原外协返工</text>
+<text text-anchor="middle" x="70.5" y="-196.6" font-family="Noto Sans CJK SC" font-size="13.00">生产项目负责人安排</text>
+</g>
+<!-- BAD&#45;&gt;OUTFIX -->
+<g id="chart1_edge15" class="edge">
+<title>BAD&#45;&gt;OUTFIX</title>
+<path fill="none" stroke="#586b7d" d="M180.74,-298.89C159.9,-281.71 127.49,-254.99 103.2,-234.96"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="104.48,-232.84 97.52,-230.28 101.36,-236.62 104.48,-232.84"/>
+</g>
+<!-- INFIX -->
+<g id="chart1_node13" class="node">
+<title>INFIX</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M319,-230C319,-230 176,-230 176,-230 170,-230 164,-224 164,-218 164,-218 164,-196 164,-196 164,-190 170,-184 176,-184 176,-184 319,-184 319,-184 325,-184 331,-190 331,-196 331,-196 331,-218 331,-218 331,-224 325,-230 319,-230"/>
+<text text-anchor="middle" x="247.5" y="-210.6" font-family="Noto Sans CJK SC" font-size="13.00">厂内返工</text>
+<text text-anchor="middle" x="247.5" y="-196.6" font-family="Noto Sans CJK SC" font-size="13.00">统一派工负责人安排班组</text>
+</g>
+<!-- BAD&#45;&gt;INFIX -->
+<g id="chart1_edge16" class="edge">
+<title>BAD&#45;&gt;INFIX</title>
+<path fill="none" stroke="#586b7d" d="M208.89,-298.65C216.01,-281.93 226.91,-256.35 235.31,-236.62"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="237.57,-237.57 238.06,-230.17 233.06,-235.65 237.57,-237.57"/>
+</g>
+<!-- OUTFIX&#45;&gt;Q -->
+<g id="chart1_edge17" class="edge">
+<title>OUTFIX&#45;&gt;Q</title>
+<path fill="none" stroke="#586b7d" d="M133.07,-230.13C144.29,-234.1 152.5,-237 152.5,-237 152.5,-237 735.5,-255 735.5,-255 735.5,-255 735.5,-267 735.5,-267 735.5,-267 620.5,-349 620.5,-349 620.5,-349 479.5,-367 479.5,-367 479.5,-367 426.5,-397 426.5,-397 426.5,-397 380.5,-489 380.5,-489 380.5,-489 364,-511.65 349.77,-531.18"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="347.78,-529.75 345.64,-536.85 351.74,-532.64 347.78,-529.75"/>
+<text text-anchor="middle" x="502.5" y="-370.2" font-family="Noto Sans CJK SC" font-size="11.00">重新报检</text>
+</g>
+<!-- INFIX&#45;&gt;Q -->
+<g id="chart1_edge18" class="edge">
+<title>INFIX&#45;&gt;Q</title>
+<path fill="none" stroke="#586b7d" d="M331.11,-229.46C347.9,-233.77 360.5,-237 360.5,-237 360.5,-237 818.5,-255 818.5,-255 818.5,-255 818.5,-267 818.5,-267 818.5,-267 814.5,-349 814.5,-349 814.5,-349 541.5,-367 541.5,-367 541.5,-367 403.5,-519 403.5,-519 403.5,-519 391.26,-525.62 376.73,-533.47"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="375.39,-531.41 370.4,-536.89 377.72,-535.72 375.39,-531.41"/>
+<text text-anchor="middle" x="564.5" y="-370.2" font-family="Noto Sans CJK SC" font-size="11.00">重新报检</text>
+</g>
+<!-- IN -->
+<g id="chart1_node15" class="node">
+<title>IN</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M591,-237C591,-237 384,-237 384,-237 378,-237 372,-231 372,-225 372,-225 372,-189 372,-189 372,-183 378,-177 384,-177 384,-177 591,-177 591,-177 597,-177 603,-183 603,-189 603,-189 603,-225 603,-225 603,-231 597,-237 591,-237"/>
+<text text-anchor="middle" x="487.5" y="-217.6" font-family="Noto Sans CJK SC" font-size="13.00">厂内交接</text>
+<text text-anchor="middle" x="487.5" y="-203.6" font-family="Noto Sans CJK SC" font-size="13.00">交出班组填写，接收班组核数量确认</text>
+<text text-anchor="middle" x="487.5" y="-189.6" font-family="Noto Sans CJK SC" font-size="13.00">第一版项目负责人登记结果</text>
+</g>
+<!-- TRANSFER&#45;&gt;IN -->
+<g id="chart1_edge19" class="edge">
+<title>TRANSFER&#45;&gt;IN</title>
+<path fill="none" stroke="#586b7d" d="M491.08,-285.34C490.49,-272.61 489.8,-257.73 489.19,-244.44"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="491.63,-244.13 488.85,-237.25 486.73,-244.35 491.63,-244.13"/>
+<text text-anchor="middle" x="540.5" y="-258.2" font-family="Noto Sans CJK SC" font-size="11.00">厂内／已回厂后交接</text>
+</g>
+<!-- DIRECT -->
+<g id="chart1_node17" class="node">
+<title>DIRECT</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M832.5,-237C832.5,-237 638.5,-237 638.5,-237 632.5,-237 626.5,-231 626.5,-225 626.5,-225 626.5,-189 626.5,-189 626.5,-183 632.5,-177 638.5,-177 638.5,-177 832.5,-177 832.5,-177 838.5,-177 844.5,-183 844.5,-189 844.5,-189 844.5,-225 844.5,-225 844.5,-231 838.5,-237 832.5,-237"/>
+<text text-anchor="middle" x="735.5" y="-217.6" font-family="Noto Sans CJK SC" font-size="13.00">外协直接送下一家</text>
+<text text-anchor="middle" x="735.5" y="-203.6" font-family="Noto Sans CJK SC" font-size="13.00">下家核图号、数量并反馈收到</text>
+<text text-anchor="middle" x="735.5" y="-189.6" font-family="Noto Sans CJK SC" font-size="13.00">项目负责人登记真实交出、接收方</text>
+</g>
+<!-- TRANSFER&#45;&gt;DIRECT -->
+<g id="chart1_edge20" class="edge">
+<title>TRANSFER&#45;&gt;DIRECT</title>
+<path fill="none" stroke="#586b7d" d="M535.66,-296.82C571.01,-281.11 621.76,-258.55 663.28,-240.1"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="664.46,-242.26 669.86,-237.17 662.47,-237.78 664.46,-242.26"/>
+<text text-anchor="middle" x="679.5" y="-258.2" font-family="Noto Sans CJK SC" font-size="11.00">外协现场检验后直送</text>
+</g>
+<!-- NEXT -->
+<g id="chart1_node18" class="node">
+<title>NEXT</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M694.5,-140C694.5,-140 526.5,-140 526.5,-140 520.5,-140 514.5,-134 514.5,-128 514.5,-128 514.5,-106 514.5,-106 514.5,-100 520.5,-94 526.5,-94 526.5,-94 694.5,-94 694.5,-94 700.5,-94 706.5,-100 706.5,-106 706.5,-106 706.5,-128 706.5,-128 706.5,-134 700.5,-140 694.5,-140"/>
+<text text-anchor="middle" x="610.5" y="-120.6" font-family="Noto Sans CJK SC" font-size="13.00">同批接收与合格范围交集</text>
+<text text-anchor="middle" x="610.5" y="-106.6" font-family="Noto Sans CJK SC" font-size="13.00">可用且未耗无暂停，部分开工</text>
+</g>
+<!-- IN&#45;&gt;NEXT -->
+<g id="chart1_edge21" class="edge">
+<title>IN&#45;&gt;NEXT</title>
+<path fill="none" stroke="#586b7d" d="M528.12,-176.94C542.81,-166.43 559.31,-154.62 573.66,-144.36"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="575.4,-146.12 579.67,-140.06 572.55,-142.14 575.4,-146.12"/>
+</g>
+<!-- RETURN&#45;&gt;NEED -->
+<g id="chart1_edge8" class="edge">
+<title>RETURN&#45;&gt;NEED</title>
+<path fill="none" stroke="#586b7d" d="M436.07,-759.84C422.1,-745.99 405.26,-729.3 390.44,-714.61"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="391.78,-712.49 385.08,-709.3 388.33,-715.97 391.78,-712.49"/>
+</g>
+<!-- DIRECT&#45;&gt;NEXT -->
+<g id="chart1_edge22" class="edge">
+<title>DIRECT&#45;&gt;NEXT</title>
+<path fill="none" stroke="#586b7d" d="M694.22,-176.94C679.29,-166.43 662.52,-154.62 647.94,-144.36"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="648.97,-142.08 641.83,-140.06 646.14,-146.09 648.97,-142.08"/>
+</g>
+<!-- NEXT&#45;&gt;WORK -->
+<g id="chart1_edge23" class="edge">
+<title>NEXT&#45;&gt;WORK</title>
+<path fill="none" stroke="#586b7d" d="M702.45,-140.05C772.32,-156.81 856.5,-177 856.5,-177 856.5,-177 856.5,-237 856.5,-237 856.5,-237 832.5,-349 832.5,-349 832.5,-349 416.5,-1102 416.5,-1102 416.5,-1102 387.63,-1118.72 358.94,-1135.32"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="357.66,-1133.23 352.83,-1138.86 360.12,-1137.47 357.66,-1133.23"/>
+<text text-anchor="middle" x="710.5" y="-674.2" font-family="Noto Sans CJK SC" font-size="11.00">仍有后续工序</text>
+</g>
+<!-- FINAL -->
+<g id="chart1_node19" class="node">
+<title>FINAL</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M694.5,-46C694.5,-46 526.5,-46 526.5,-46 520.5,-46 514.5,-40 514.5,-34 514.5,-34 514.5,-12 514.5,-12 514.5,-6 520.5,0 526.5,0 526.5,0 694.5,0 694.5,0 700.5,0 706.5,-6 706.5,-12 706.5,-12 706.5,-34 706.5,-34 706.5,-40 700.5,-46 694.5,-46"/>
+<text text-anchor="middle" x="610.5" y="-26.6" font-family="Noto Sans CJK SC" font-size="13.00">全部适用部件工序完成</text>
+<text text-anchor="middle" x="610.5" y="-12.6" font-family="Noto Sans CJK SC" font-size="13.00">进入总装／后续适用交付环节</text>
+</g>
+<!-- NEXT&#45;&gt;FINAL -->
+<g id="chart1_edge24" class="edge">
+<title>NEXT&#45;&gt;FINAL</title>
+<path fill="none" stroke="#586b7d" d="M610.5,-93.73C610.5,-81.52 610.5,-66.25 610.5,-53.11"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="612.95,-53.07 610.5,-46.07 608.05,-53.07 612.95,-53.07"/>
+<text text-anchor="middle" x="650" y="-67.2" font-family="Noto Sans CJK SC" font-size="11.00">适用工序已完成</text>
+</g>
+</g>
+</svg>
+</div></div><p class="note">图中为工序重复流转模型；各部件只走适用工序。需要检验的在转序前取得合格结果，外协直接转送不免检。提前指定不代表开工，只有核实未开工部分可以转派，总量守恒；完工不等于全部合格。外协返回先接收再检验，返工关联原件与不合格依据，不重复计首次产出。QMS 断联、撤销或批次映射未知禁止正式下道开工，已发生违规保留异常事实。</p></section><section class="panel" id="p2" hidden><h2>问题处理与变更</h2><p class="intro">组织跟进、专业处理和关闭责任分别明确。</p><div class="viewer"><div class="drawing"><svg width="849pt" height="728pt"
+ viewBox="0.00 0.00 849.00 728.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="chart2_graph0" class="graph" transform="scale(1 1) rotate(0) translate(18 710)">
+<title>issue</title>
+<polygon fill="white" stroke="transparent" points="-18,18 -18,-710 831,-710 831,18 -18,18"/>
+<!-- DISC -->
+<g id="chart2_node1" class="node">
+<title>DISC</title>
+<path fill="#eef3f8" stroke="#8ba0b7" d="M206,-685C206,-685 12,-685 12,-685 6,-685 0,-679 0,-673 0,-673 0,-651 0,-651 0,-645 6,-639 12,-639 12,-639 206,-639 206,-639 212,-639 218,-645 218,-651 218,-651 218,-673 218,-673 218,-679 212,-685 206,-685"/>
+<text text-anchor="middle" x="109" y="-665.6" font-family="Noto Sans CJK SC" font-size="13.00">发现阻塞／变更影响</text>
+<text text-anchor="middle" x="109" y="-651.6" font-family="Noto Sans CJK SC" font-size="13.00">关联工单、部件图号和受影响工序</text>
+</g>
+<!-- ORG -->
+<g id="chart2_node2" class="node">
+<title>ORG</title>
+<path fill="#e9f0f5" stroke="#8ba0b7" d="M323,-584C323,-584 167,-584 167,-584 161,-584 155,-578 155,-572 155,-572 155,-550 155,-550 155,-544 161,-538 167,-538 167,-538 323,-538 323,-538 329,-538 335,-544 335,-550 335,-550 335,-572 335,-572 335,-578 329,-584 323,-584"/>
+<text text-anchor="middle" x="245" y="-564.6" font-family="Noto Sans CJK SC" font-size="13.00">生产项目负责人组织、跟进</text>
+<text text-anchor="middle" x="245" y="-550.6" font-family="Noto Sans CJK SC" font-size="13.00">明确现场情况及履约影响</text>
+</g>
+<!-- DISC&#45;&gt;ORG -->
+<g id="chart2_edge1" class="edge">
+<title>DISC&#45;&gt;ORG</title>
+<path fill="none" stroke="#586b7d" d="M139.52,-638.78C159.99,-623.88 187.06,-604.18 208.65,-588.46"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="210.36,-590.24 214.58,-584.14 207.48,-586.28 210.36,-590.24"/>
+</g>
+<!-- DEPT -->
+<g id="chart2_node3" class="node">
+<title>DEPT</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M354.5,-501C354.5,-501 135.5,-501 135.5,-501 129.5,-501 123.5,-495 123.5,-489 123.5,-489 123.5,-467 123.5,-467 123.5,-461 129.5,-455 135.5,-455 135.5,-455 354.5,-455 354.5,-455 360.5,-455 366.5,-461 366.5,-467 366.5,-467 366.5,-489 366.5,-489 366.5,-495 360.5,-501 354.5,-501"/>
+<text text-anchor="middle" x="245" y="-481.6" font-family="Noto Sans CJK SC" font-size="13.00">对应部门安排处理人</text>
+<text text-anchor="middle" x="245" y="-467.6" font-family="Noto Sans CJK SC" font-size="13.00">技术问题技术安排；工艺问题工艺安排</text>
+</g>
+<!-- ORG&#45;&gt;DEPT -->
+<g id="chart2_edge2" class="edge">
+<title>ORG&#45;&gt;DEPT</title>
+<path fill="none" stroke="#586b7d" d="M245,-537.87C245,-528.76 245,-518.08 245,-508.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="247.45,-508.11 245,-501.11 242.55,-508.11 247.45,-508.11"/>
+</g>
+<!-- HANDLE -->
+<g id="chart2_node4" class="node">
+<title>HANDLE</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M367.5,-418C367.5,-418 122.5,-418 122.5,-418 116.5,-418 110.5,-412 110.5,-406 110.5,-406 110.5,-384 110.5,-384 110.5,-378 116.5,-372 122.5,-372 122.5,-372 367.5,-372 367.5,-372 373.5,-372 379.5,-378 379.5,-384 379.5,-384 379.5,-406 379.5,-406 379.5,-412 373.5,-418 367.5,-418"/>
+<text text-anchor="middle" x="245" y="-398.6" font-family="Noto Sans CJK SC" font-size="13.00">专业处理与沟通</text>
+<text text-anchor="middle" x="245" y="-384.6" font-family="Noto Sans CJK SC" font-size="13.00">微信群可沟通；必要时提供新图／工艺资料</text>
+</g>
+<!-- DEPT&#45;&gt;HANDLE -->
+<g id="chart2_edge3" class="edge">
+<title>DEPT&#45;&gt;HANDLE</title>
+<path fill="none" stroke="#586b7d" d="M245,-454.87C245,-445.76 245,-435.08 245,-425.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="247.45,-425.11 245,-418.11 242.55,-425.11 247.45,-425.11"/>
+</g>
+<!-- SOLVE -->
+<g id="chart2_node5" class="node">
+<title>SOLVE</title>
+<path fill="#fff1dc" stroke="#8ba0b7" d="M233.54,-331.44C233.54,-331.44 153.46,-306.56 153.46,-306.56 147.73,-304.78 147.73,-301.22 153.46,-299.44 153.46,-299.44 233.54,-274.56 233.54,-274.56 239.27,-272.78 250.73,-272.78 256.46,-274.56 256.46,-274.56 336.54,-299.44 336.54,-299.44 342.27,-301.22 342.27,-304.78 336.54,-306.56 336.54,-306.56 256.46,-331.44 256.46,-331.44 250.73,-333.22 239.27,-333.22 233.54,-331.44"/>
+<text text-anchor="middle" x="245" y="-299.6" font-family="Noto Sans CJK SC" font-size="13.00">部门能解决？</text>
+</g>
+<!-- HANDLE&#45;&gt;SOLVE -->
+<g id="chart2_edge4" class="edge">
+<title>HANDLE&#45;&gt;SOLVE</title>
+<path fill="none" stroke="#586b7d" d="M245,-371.75C245,-362.87 245,-352.39 245,-342.35"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="247.45,-342.16 245,-335.16 242.55,-342.16 247.45,-342.16"/>
+</g>
+<!-- ESC -->
+<g id="chart2_node6" class="node">
+<title>ESC</title>
+<path fill="#e7effa" stroke="#8ba0b7" d="M242.5,-223C242.5,-223 35.5,-223 35.5,-223 29.5,-223 23.5,-217 23.5,-211 23.5,-211 23.5,-189 23.5,-189 23.5,-183 29.5,-177 35.5,-177 35.5,-177 242.5,-177 242.5,-177 248.5,-177 254.5,-183 254.5,-189 254.5,-189 254.5,-211 254.5,-211 254.5,-217 248.5,-223 242.5,-223"/>
+<text text-anchor="middle" x="139" y="-203.6" font-family="Noto Sans CJK SC" font-size="13.00">未解决：项目部牵头协调</text>
+<text text-anchor="middle" x="139" y="-189.6" font-family="Noto Sans CJK SC" font-size="13.00">跨工单优先顺序、资源和跨部门冲突</text>
+</g>
+<!-- SOLVE&#45;&gt;ESC -->
+<g id="chart2_edge6" class="edge">
+<title>SOLVE&#45;&gt;ESC</title>
+<path fill="none" stroke="#586b7d" d="M220.42,-278.57C204.7,-263.6 184.25,-244.12 167.78,-228.42"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="169.12,-226.31 162.36,-223.26 165.74,-229.86 169.12,-226.31"/>
+<text text-anchor="middle" x="215" y="-244.2" font-family="Noto Sans CJK SC" font-size="11.00">无法解决</text>
+</g>
+<!-- CLOSE -->
+<g id="chart2_node7" class="node">
+<title>CLOSE</title>
+<path fill="#e4f3f2" stroke="#8ba0b7" d="M522,-223C522,-223 290,-223 290,-223 284,-223 278,-217 278,-211 278,-211 278,-189 278,-189 278,-183 284,-177 290,-177 290,-177 522,-177 522,-177 528,-177 534,-183 534,-189 534,-189 534,-211 534,-211 534,-217 528,-223 522,-223"/>
+<text text-anchor="middle" x="406" y="-203.6" font-family="Noto Sans CJK SC" font-size="13.00">责任部门负责人确认处理完成并关闭</text>
+<text text-anchor="middle" x="406" y="-189.6" font-family="Noto Sans CJK SC" font-size="13.00">不由生产项目负责人代关或再审批</text>
+</g>
+<!-- SOLVE&#45;&gt;CLOSE -->
+<g id="chart2_edge5" class="edge">
+<title>SOLVE&#45;&gt;CLOSE</title>
+<path fill="none" stroke="#586b7d" d="M278.36,-281.07C303.45,-265.33 337.97,-243.68 364.79,-226.85"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="366.1,-228.92 370.73,-223.12 363.5,-224.77 366.1,-228.92"/>
+<text text-anchor="middle" x="379.5" y="-244.2" font-family="Noto Sans CJK SC" font-size="11.00">可以，落实解决</text>
+</g>
+<!-- ESC&#45;&gt;HANDLE -->
+<g id="chart2_edge7" class="edge">
+<title>ESC&#45;&gt;HANDLE</title>
+<path fill="none" stroke="#586b7d" d="M254.73,-221.05C261.72,-222.26 266,-223 266,-223 266,-223 424,-241 424,-241 424,-241 424,-253 424,-253 424,-253 359,-335 359,-335 359,-335 325.11,-352.54 294.29,-368.49"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="292.86,-366.47 287.77,-371.86 295.12,-370.82 292.86,-366.47"/>
+<text text-anchor="middle" x="444" y="-300.2" font-family="Noto Sans CJK SC" font-size="11.00">明确协调方案</text>
+</g>
+<!-- UPDATE -->
+<g id="chart2_node8" class="node">
+<title>UPDATE</title>
+<path fill="#e9f0f5" stroke="#8ba0b7" d="M649.5,-129C649.5,-129 442.5,-129 442.5,-129 436.5,-129 430.5,-123 430.5,-117 430.5,-117 430.5,-95 430.5,-95 430.5,-89 436.5,-83 442.5,-83 442.5,-83 649.5,-83 649.5,-83 655.5,-83 661.5,-89 661.5,-95 661.5,-95 661.5,-117 661.5,-117 661.5,-123 655.5,-129 649.5,-129"/>
+<text text-anchor="middle" x="546" y="-109.6" font-family="Noto Sans CJK SC" font-size="13.00">生产项目负责人另行更新现场任务</text>
+<text text-anchor="middle" x="546" y="-95.6" font-family="Noto Sans CJK SC" font-size="13.00">是否恢复、预计完成日期及剩余影响</text>
+</g>
+<!-- CLOSE&#45;&gt;UPDATE -->
+<g id="chart2_edge8" class="edge">
+<title>CLOSE&#45;&gt;UPDATE</title>
+<path fill="none" stroke="#586b7d" d="M439.53,-176.96C459.56,-163.8 485.11,-147.01 506.16,-133.18"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="507.75,-135.07 512.25,-129.18 505.06,-130.97 507.75,-135.07"/>
+</g>
+<!-- MONITOR -->
+<g id="chart2_node9" class="node">
+<title>MONITOR</title>
+<path fill="#e7effa" stroke="#8ba0b7" d="M624,-46C624,-46 468,-46 468,-46 462,-46 456,-40 456,-34 456,-34 456,-12 456,-12 456,-6 462,0 468,0 468,0 624,0 624,0 630,0 636,-6 636,-12 636,-12 636,-34 636,-34 636,-40 630,-46 624,-46"/>
+<text text-anchor="middle" x="546" y="-26.6" font-family="Noto Sans CJK SC" font-size="13.00">项目部查看进度与交期风险</text>
+<text text-anchor="middle" x="546" y="-12.6" font-family="Noto Sans CJK SC" font-size="13.00">问题关闭不等于追回延误</text>
+</g>
+<!-- UPDATE&#45;&gt;MONITOR -->
+<g id="chart2_edge9" class="edge">
+<title>UPDATE&#45;&gt;MONITOR</title>
+<path fill="none" stroke="#586b7d" d="M546,-82.87C546,-73.76 546,-63.08 546,-53.33"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="548.45,-53.11 546,-46.11 543.55,-53.11 548.45,-53.11"/>
+</g>
+<!-- CHANGE -->
+<g id="chart2_node10" class="node">
+<title>CHANGE</title>
+<path fill="#eef0fa" stroke="#8ba0b7" d="M511,-692C511,-692 253,-692 253,-692 247,-692 241,-686 241,-680 241,-680 241,-644 241,-644 241,-638 247,-632 253,-632 253,-632 511,-632 511,-632 517,-632 523,-638 523,-644 523,-644 523,-680 523,-680 523,-686 517,-692 511,-692"/>
+<text text-anchor="middle" x="382" y="-672.6" font-family="Noto Sans CJK SC" font-size="13.00">变更依据</text>
+<text text-anchor="middle" x="382" y="-658.6" font-family="Noto Sans CJK SC" font-size="13.00">客户范围：评估后签补充协议，销售通知</text>
+<text text-anchor="middle" x="382" y="-644.6" font-family="Noto Sans CJK SC" font-size="13.00">技术变更：统一通知，列工单图号和部门事项</text>
+</g>
+<!-- CHANGE&#45;&gt;ORG -->
+<g id="chart2_edge10" class="edge">
+<title>CHANGE&#45;&gt;ORG</title>
+<path fill="none" stroke="#586b7d" stroke-dasharray="5,2" d="M341.64,-631.83C322.63,-618.1 300.13,-601.84 281.62,-588.47"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="282.62,-586.16 275.51,-584.05 279.75,-590.13 282.62,-586.16"/>
+<text text-anchor="middle" x="337" y="-605.2" font-family="Noto Sans CJK SC" font-size="11.00">关联影响</text>
+</g>
+<!-- QUALITY -->
+<g id="chart2_node11" class="node">
+<title>QUALITY</title>
+<path fill="#e7f3e8" stroke="#8ba0b7" d="M801,-223C801,-223 569,-223 569,-223 563,-223 557,-217 557,-211 557,-211 557,-189 557,-189 557,-183 563,-177 569,-177 569,-177 801,-177 801,-177 807,-177 813,-183 813,-189 813,-189 813,-211 813,-211 813,-217 807,-223 801,-223"/>
+<text text-anchor="middle" x="685" y="-203.6" font-family="Noto Sans CJK SC" font-size="13.00">质量问题仍沿用 QMS</text>
+<text text-anchor="middle" x="685" y="-189.6" font-family="Noto Sans CJK SC" font-size="13.00">品质组织处理；质量放行以检验结果为准</text>
+</g>
+<!-- QUALITY&#45;&gt;UPDATE -->
+<g id="chart2_edge11" class="edge">
+<title>QUALITY&#45;&gt;UPDATE</title>
+<path fill="none" stroke="#586b7d" stroke-dasharray="5,2" d="M651.71,-176.96C631.82,-163.8 606.45,-147.01 585.55,-133.18"/>
+<polygon fill="#586b7d" stroke="#586b7d" points="586.69,-131 579.5,-129.18 583.99,-135.08 586.69,-131"/>
+<text text-anchor="middle" x="657" y="-150.2" font-family="Noto Sans CJK SC" font-size="11.00">提供质量依据</text>
+</g>
+</g>
+</svg>
+</div></div><p class="note">各责任部门解决后在系统关闭问题，生产项目负责人另行更新生产进展和预计完成时间。普通问题由责任部门负责人关闭，现场恢复独立更新；措施到期未完成向各责任部门分管领导升级并通知执行人、部门负责人和项目部。延期由执行人申请、项目部确认，旧逾期及升级保留。</p></section><section class="panel"><h2>资料变更与资格边界</h2><p class="intro">原任务固定资料版本；部门分别确认接收，新图已发不代表旧图已收回。技术明确局部暂停范围，范围内禁止新开工、正常完工或转序；暂停前事实核实后可补录，不能倒填。技术落实与现场恢复确认同时具备才解除，质量仍需核对。QMS 外协停用禁止新增派工，既有任务标风险并保留；人员停用由部门负责人或项目部移交未完成工作，原行为人留存。</p><p class="note">外部 DOT / SVG / PNG 为旧讨论图快照，未重新生成；本 HTML 内嵌图文字及说明为本轮更新版。客户变更须销售协议确认后更新正式范围；进场与现场关键节点分责维护。真实样例、接口、工作日历及领导配置仍待证据。</p></section></main><footer>依据：履约业务流程草案（2026-10-13 更新）。实线表示业务衔接，虚线表示反馈或关联。各分支按实际需要分批推进，不表示整机全部准备完成后才能开始。<br>QMS 保留质量业务；K3 保留财务、库房、采购申请、订单、付款和收料，本期暂不接入但预留接口。供应商、外协、组织及人员班组来源为 QMS；统一身份和数据接口未核实，未接通。真实样例暂无。</footer><script>
+let active=0;const sizes=[100,100,100];const panels=[...document.querySelectorAll('section[id^=p]')];function draw(){panels[active].querySelector('.drawing').style.width=sizes[active]+'%'}document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{active=+b.dataset.i;panels.forEach((p,i)=>p.hidden=i!==active);document.querySelectorAll('.tab').forEach((x,i)=>x.setAttribute('aria-selected',i===active));draw()});document.getElementById('fit').onclick=()=>{sizes[active]=100;draw()};document.getElementById('actual').onclick=()=>{const p=panels[active];const w=+p.querySelector('svg').getAttribute('viewBox').split(/\s+/)[2];sizes[active]=Math.max(100,w*1.33/p.querySelector('.viewer').clientWidth*100);draw()};document.getElementById('plus').onclick=()=>{sizes[active]=Math.min(700,sizes[active]*1.25);draw()};document.getElementById('minus').onclick=()=>{sizes[active]=Math.max(50,sizes[active]/1.25);draw()};document.getElementById('print').onclick=()=>window.print();
+</script></html>
