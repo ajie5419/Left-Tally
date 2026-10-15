@@ -29,30 +29,39 @@
 
 ## 工具链
 
-Node 与 pnpm 版本锁定在 `.prototools`，安装在项目内的 `.tools/proto-home`，不使用也不修改全局版本。所有命令都通过 `scripts/toolchain.mjs` 运行：它检查锁定版本后再执行命令。启动它的 Node 可以是任意版本。
+Node 与 pnpm 版本锁定在 `.prototools`，安装在项目内的 `.tools/proto-home`，不使用也不修改全局版本。所有命令都通过 `scripts/toolchain.mjs` 运行：它检查锁定版本后再执行命令。
+
+用项目内锁定的 Node 启动它，这样不依赖系统是否安装 Node 或安装了哪个版本。在工程根目录执行：
 
 ```bash
-node scripts/toolchain.mjs pnpm verify
+GC_NODE="$PWD/.tools/proto-home/tools/node/$(sed -n 's/^node = "\(.*\)"$/\1/p' .prototools)/bin/node"
+```
+
+之后的命令都用 `"$GC_NODE" scripts/toolchain.mjs …`，例如：
+
+```bash
+"$GC_NODE" scripts/toolchain.mjs pnpm verify
 ```
 
 直接运行 `pnpm …` 会使用当前 shell 的 Node。如果版本不是 24，会报 `ERR_PNPM_UNSUPPORTED_ENGINE`。
 
 ### 首次安装
 
-以下步骤与 CI（`.github/workflows/bootstrap.yml`）一致。需要先安装 [proto](https://moonrepo.dev/proto) 0.63.1。
+以下步骤与 CI（`.github/workflows/bootstrap.yml`）一致。只需先安装 [proto](https://moonrepo.dev/proto) 0.63.1，不需要系统 Node。第一步把锁定的 Node 和 pnpm 装进 `.tools/proto-home`，之后用它启动其余步骤。
 
 ```bash
 PROTO_HOME="$PWD/.tools/proto-home" proto install
-node scripts/toolchain.mjs node scripts/ci/install-tools.mjs
-node scripts/toolchain.mjs pnpm install --frozen-lockfile --store-dir .tools/pnpm-store
-PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright" node scripts/toolchain.mjs pnpm exec playwright install chromium
+GC_NODE="$PWD/.tools/proto-home/tools/node/$(sed -n 's/^node = "\(.*\)"$/\1/p' .prototools)/bin/node"
+"$GC_NODE" scripts/toolchain.mjs node scripts/ci/install-tools.mjs
+"$GC_NODE" scripts/toolchain.mjs pnpm install --frozen-lockfile --store-dir .tools/pnpm-store
+PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright" "$GC_NODE" scripts/toolchain.mjs pnpm exec playwright install chromium
 ```
 
 `install-tools.mjs` 按 `config/ci/tools.json` 中的版本和 SHA256 下载 rtk、actionlint 到 `.tools/ci-tools/bin`；`scripts/toolchain.mjs` 会把这个目录加入 PATH。
 
 ## 常用命令
 
-均以 `node scripts/toolchain.mjs pnpm <命令>` 运行。
+均以 `"$GC_NODE" scripts/toolchain.mjs pnpm <命令>` 运行。
 
 | 命令 | 作用 |
 | --- | --- |

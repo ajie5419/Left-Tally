@@ -8,7 +8,7 @@ const baseline = {
   'AGENTS.md':
     '778bc7b6bfc282259929ce0cc45e2b8639af8798347c5c6665408032632fbb55',
   'Grand Comptroller/工程治理与门禁基线-2026-10-13.md':
-    '6b9a55d1de183fb8b686758a4835f90115c6f4e9dcd36d40348537aa4357a294',
+    '4af1198b4c796037ee9242cfca7abb732f5a31a4508709d40b12d319c846d171',
 };
 const required = [
   'check:static',
