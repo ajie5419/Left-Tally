@@ -9,7 +9,7 @@ import {
   allocatePort,
   assertPortClosed,
 } from './database-isolation.mjs';
-import { containerBackend } from './database-backend.mjs';
+import { containerBackend, sameInventory } from './database-backend.mjs';
 
 const config = JSON.parse(readFileSync('config/database-probe.json', 'utf8'));
 const backend = containerBackend(
@@ -138,7 +138,7 @@ async function cleanup() {
     report.inventoryAfter = inventory;
     if (inventory.split(/\s+/).includes(target.name))
       throw new Error('MYSQL_PROBE_CONTAINER_SURVIVED');
-    if (inventory !== report.inventoryBefore)
+    if (!sameInventory(report.inventoryBefore, inventory))
       throw new Error('MYSQL_PROBE_EXISTING_INVENTORY_CHANGED');
     await assertPortClosed(target.port);
     report.portClosed = true;
