@@ -11,9 +11,7 @@ const home = resolve('.tools/proto-home');
 const node = resolve(home, 'tools/node', nodeVersion, 'bin/node');
 const pnpm = resolve(home, 'tools/pnpm', pnpmVersion, 'bin/pnpm.cjs');
 if (!existsSync(node) || !existsSync(pnpm))
-  throw new Error(
-    'Missing project-local proto installation; see bootstrap review record',
-  );
+  throw new Error('Missing project-local proto installation; see README.md');
 const nodeCheck = spawnSync(node, ['--version'], { encoding: 'utf8' });
 const pnpmCheck = spawnSync(node, [pnpm, '--version'], { encoding: 'utf8' });
 if (
