@@ -1,6 +1,6 @@
 # 初始化 API 的实际响应契约
 
-本说明对应当前 checkout `/Users/zhaoxiaojie/代码/Grand-Comptroller`，采用方案 A。锁定 Hono 4.11.7；不建立自有 HTTP 头清洗或代理协议层。旧资料中的带尾随空格目录是历史路径。
+本说明对应当前 checkout `/Users/zhaoxiaojie/代码/Grand-Comptroller`，采用方案 A。锁定 Hono 4.13.7（为清除 4.11.7 的生产依赖安全公告而升级）；不建立自有 HTTP 头清洗或代理协议层。旧资料中的带尾随空格目录是历史路径。
 
 | 入口或异常                           | 状态与响应                                                                                                                                                                        |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -18,9 +18,9 @@
 
 ## 上下文与中间件的实测边界
 
-`getResponse()` 本身不感知 Context。已在锁定版本上验证：通过 `c.header()` 预设的普通头和多个 Cookie，以及显式 Response 的多个 Cookie，均由原生工厂接入；`await next()` 后的中间件仍执行，后置 Cookie 可追加。测试实际使用 Hono `secureHeaders`，验证 CSP 和 nosniff 最终由后置安全中间件覆盖。
+`getResponse()` 本身不感知 Context。已在锁定版本上验证：通过 `c.header()` 预设的普通头和多个 Cookie，以及显式 Response 的多个 Cookie，均由原生工厂接入；`await next()` 后的中间件仍执行，后置 Cookie 可追加。测试实际使用 Hono `secureHeaders`（配置 `defaultSrc: 'none'` 的 CSP），验证 CSP 和 nosniff 最终由后置安全中间件覆盖。
 
-Hono 4.11.7 有具体限制：若中间件提前读取 `c.res`，响应已在上下文中建立；框架的 `Context.res` 赋值会覆盖同名上下文头，并以旧上下文 Cookie 替换新响应 Cookie。测试和独立原生探针均记录了这个行为。当前生产入口没有提前读取 `c.res` 的中间件，也未全局安装 `secureHeaders`；测试中的中间件结果不代表生产已配置安全策略。今后接入这类中间件须依据实际顺序另行验证，不能宣称所有组合都保留全部 Cookie。
+Hono 4.13.7 有具体限制（与 4.11.7 相同）：若中间件提前读取 `c.res`，响应已在上下文中建立；框架的 `Context.res` 赋值会覆盖同名上下文头，并以旧上下文 Cookie 替换新响应 Cookie。测试和独立原生探针均记录了这个行为。当前生产入口没有提前读取 `c.res` 的中间件，也未全局安装 `secureHeaders`；测试中的中间件结果不代表生产已配置安全策略。今后接入这类中间件须依据实际顺序另行验证，不能宣称所有组合都保留全部 Cookie。
 
 ## 保留与删除
 
@@ -31,5 +31,6 @@ Hono 4.11.7 有具体限制：若中间件提前读取 `c.res`，响应已在上
 - [Hono HTTPException 官方文档](https://hono.dev/docs/api/exception)
 - [Hono Context 官方文档](https://hono.dev/docs/api/context)
 - [Hono 中间件生命周期官方文档](https://hono.dev/docs/guides/middleware)
-- 锁定源码：`node_modules/.pnpm/hono@4.11.7/node_modules/hono/dist/http-exception.js`、`context.js`、`compose.js`、`hono-base.js`、`middleware/secure-headers/secure-headers.js`
+- 锁定源码：`node_modules/.pnpm/hono@4.13.7/node_modules/hono/dist/http-exception.js`、`context.js`、`compose.js`、`hono-base.js`、`middleware/secure-headers/secure-headers.js`
+- 升级复核：4.11.7 与 4.13.7 的上述源文件逐一比对。`http-exception.js` 与 `compose.js` 相同；`context.js` 仅将 `new Response` 收敛为内部工厂，并重写 `newResponse` 的头合并实现，`set res` 的同名头覆盖与 Cookie 替换逻辑不变，传入 Response 时的头合并结果不变；`hono-base.js` 改动为路由方法名与子应用 basePath；`secure-headers.js` 改动为 CSP nonce 回调只写入对应头，以及 Permissions-Policy 的 `none` 输出为 `()`，不影响本文所述的后置覆盖顺序。上述测试在 4.13.7 上未改断言全部通过
 - 本地验证与源快照证据由本次清理交付记录单独保存；本说明不代表 CI、远端强制、真实业务验收或独立审查完成。

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { secureHeaders } from 'hono/secure-headers';
 import {
   app,
   createServerApp,
@@ -561,11 +562,10 @@ describe('global error handling and HTTP status mapping', () => {
     async (kind) => {
       const log = vi.spyOn(console, 'error').mockImplementation(() => {});
       const testApp = createServerApp()
-        .use('/test-middleware', async (context, next) => {
-          await next();
-          context.header('Content-Security-Policy', "default-src 'none'");
-          context.header('X-Content-Type-Options', 'nosniff');
-        })
+        .use(
+          '/test-middleware',
+          secureHeaders({ contentSecurityPolicy: { defaultSrc: ["'none'"] } }),
+        )
         .use('/test-middleware', async (context, next) => {
           context.header('X-Request-Id', 'request-123');
           context.header('Set-Cookie', 'before=one; Path=/', { append: true });
