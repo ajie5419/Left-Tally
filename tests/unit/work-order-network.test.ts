@@ -105,3 +105,60 @@ it('translates local schema failures during login to user-facing error message',
   await store.login('ab', 'short');
   expect(store.error).toBe('用户名或密码不正确，请重试');
 });
+it('preserves orders and identity when personnel lookup fails after orders load', async () => {
+  const store = useWorkOrderStore(createPinia());
+  store.mode = 'production';
+  store.identity = {
+    id: 'creator',
+    name: 'Creator',
+    permissions: ['work-orders:read'],
+  };
+  vi.stubGlobal('fetch', (input: unknown) => {
+    const target =
+      typeof input === 'string'
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input instanceof Request
+            ? input.url
+            : '';
+    if (target.includes('/work-orders/sources')) {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            success: false,
+            error: { code: 'UNAVAILABLE', message: 'Personnel service down' },
+            timestamp: new Date().toISOString(),
+          }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } },
+        ),
+      );
+    }
+    return Promise.resolve(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: [
+            {
+              id: '00000000-0000-4000-8000-000000000001',
+              number: 'GC-01',
+              customer: 'Test',
+              quantity: 1,
+              dueDate: '2026-11-20',
+              project: null,
+              division: null,
+              productionLeadId: 'lead-1',
+              createdAt: '2026-10-15T00:00:00.000Z',
+            },
+          ],
+          timestamp: new Date().toISOString(),
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+  });
+  await store.refresh();
+  expect(store.identity).not.toBeNull();
+  expect(store.orders).toHaveLength(1);
+  expect(store.orders[0]?.number).toBe('GC-01');
+});

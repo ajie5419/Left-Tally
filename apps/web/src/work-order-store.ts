@@ -69,17 +69,20 @@ export const useWorkOrderStore = defineStore('work-orders', {
       this.error = '';
       this.loading = true;
       try {
-        // Orders remain readable even when personnel lookup is temporarily unavailable.
         const orders = await request('/work-orders', workOrderListSchema);
         if (version !== this.identityVersion) return;
         this.orders = orders;
         if (this.orders.some((order) => order.productionLeadId !== null)) {
-          const available = await request(
-            '/work-orders/sources',
-            workOrderSourcesSchema,
-          );
-          if (version === this.identityVersion)
-            this.leads = available.productionLeads;
+          try {
+            const available = await request(
+              '/work-orders/sources',
+              workOrderSourcesSchema,
+            );
+            if (version === this.identityVersion)
+              this.leads = available.productionLeads;
+          } catch {
+            // Orders remain readable even when personnel lookup is temporarily unavailable.
+          }
         }
       } catch (cause) {
         if (version !== this.identityVersion) return;

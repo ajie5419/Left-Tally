@@ -8,11 +8,11 @@ const health = useHealthStore();
 
 <template>
   <h1>工程状态</h1>
-  <p class="intro">当前提供基础页面和公开健康接口，正式履约能力尚未建立。</p>
+  <p class="intro">基础服务与公开健康接口状态。</p>
   <section class="panel" aria-labelledby="service-title">
     <div class="panel-heading">
       <h2 id="service-title">服务连通性</h2>
-      <ATag>初始化阶段</ATag>
+      <ATag>公开端点</ATag>
     </div>
     <p role="status" aria-live="polite">
       {{ health.result ? '健康接口已响应' : '服务状态尚未确认' }}
@@ -22,7 +22,7 @@ const health = useHealthStore();
       检测健康接口
     </AButton>
     <p class="footnote">
-      接口响应只表示服务可访问。身份认证、数据库和 QMS 接通尚未验证。
+      接口响应表示基础服务可访问。健康端点保持轻量存活探测，不承载业务鉴权。
     </p>
   </section>
   <section class="scope" aria-labelledby="scope-title">
@@ -33,8 +33,8 @@ const health = useHealthStore();
         <dd>健康状态、接口说明</dd>
       </div>
       <div>
-        <dt>正式业务</dt>
-        <dd>尚未实现</dd>
+        <dt>履约业务</dt>
+        <dd>工单新建与查看（已开放）</dd>
       </div>
       <div>
         <dt>质量系统</dt>

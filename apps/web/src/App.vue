@@ -6,7 +6,6 @@
   <div class="notice">当前开放：工单新建与查看</div>
   <div class="shell">
     <nav aria-label="主导航">
-      <RouterLink to="/engineering">工程状态</RouterLink>
       <RouterLink to="/work-orders">工单库</RouterLink>
       <RouterLink v-if="store.identity?.accountAdmin" to="/accounts">
         账户管理
