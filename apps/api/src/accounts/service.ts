@@ -83,29 +83,46 @@ export class LoginThrottle {
     private readonly maximum = 5,
     private readonly intervalMs = 60_000,
   ) {}
-  allowed(key: string) {
-    const state = this.failures.get(key);
-    if (!state) return true;
-    if (state.until <= this.now()) {
-      this.failures.delete(key);
-      return true;
+  /** Reserve an attempt before the expensive password check, so parallel bursts cannot bypass the limit. */
+  reserve(key: string) {
+    const current = this.failures.get(key);
+    if (current) {
+      if (current.until <= this.now()) {
+        this.failures.delete(key);
+      } else {
+        if (current.count >= this.maximum) return false;
+        current.count += 1;
+        this.evictOverflow();
+        return true;
+      }
     }
-    return state.count < this.maximum;
-  }
-  failed(key: string) {
-    const previous = this.failures.get(key);
-    const state = {
-      count: previous && previous.until > this.now() ? previous.count + 1 : 1,
+    this.failures.set(key, {
+      count: 1,
       until: this.now() + this.intervalMs,
-    };
-    this.failures.set(key, state);
-    while (this.failures.size > 1024) {
-      const first = this.failures.keys().next();
-      if (!first.done) this.failures.delete(first.value);
-    }
+    });
+    this.evictOverflow();
+    return true;
+  }
+  /** A failed check only extends the reserved window; the attempt was already counted by reserve(). */
+  failed(key: string) {
+    const current = this.failures.get(key);
+    if (current) current.until = this.now() + this.intervalMs;
+    else
+      this.failures.set(key, {
+        count: 1,
+        until: this.now() + this.intervalMs,
+      });
+    this.evictOverflow();
   }
   succeeded(key: string) {
     this.failures.delete(key);
+  }
+  private evictOverflow() {
+    while (this.failures.size > 1024) {
+      const first = this.failures.keys().next();
+      if (first.done) break;
+      this.failures.delete(first.value);
+    }
   }
 }
 

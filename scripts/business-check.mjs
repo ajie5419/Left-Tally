@@ -10,7 +10,7 @@ await withBusinessDatabase(async (url) => {
     [
       'vitest',
       'run',
-      'tests/integration/work-orders.test.ts',
+      'tests/integration',
       '--config',
       'config/business-vitest.config.ts',
     ],

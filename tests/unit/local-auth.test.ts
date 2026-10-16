@@ -35,11 +35,33 @@ describe('local account primitives', () => {
   it('bounds repeated failures per process and releases them after its interval', () => {
     let now = 0;
     const throttle = new LoginThrottle(() => now, 2, 1_000);
-    expect(throttle.allowed('reader')).toBe(true);
+    expect(throttle.reserve('reader')).toBe(true);
     throttle.failed('reader');
-    throttle.failed('reader');
-    expect(throttle.allowed('reader')).toBe(false);
+    expect(throttle.reserve('reader')).toBe(true);
+    expect(throttle.reserve('reader')).toBe(false);
     now = 1_000;
-    expect(throttle.allowed('reader')).toBe(true);
+    expect(throttle.reserve('reader')).toBe(true);
+  });
+
+  it('counts reserved attempts, not reported failures, against the window', () => {
+    let now = 0;
+    const throttle = new LoginThrottle(() => now, 2, 1_000);
+    expect(throttle.reserve('reader')).toBe(true);
+    expect(throttle.reserve('reader')).toBe(true);
+    expect(throttle.reserve('reader')).toBe(false);
+    now = 1_000;
+    expect(throttle.reserve('reader')).toBe(true);
+  });
+
+  it('reserves every concurrent attempt so parallel bursts cannot bypass the limit', () => {
+    const now = 0;
+    const throttle = new LoginThrottle(() => now, 5, 1_000);
+    const reservations = Array.from({ length: 8 }, () =>
+      throttle.reserve('burst'),
+    );
+    expect(reservations.filter(Boolean)).toHaveLength(5);
+    expect(reservations.slice(5).some(Boolean)).toBe(false);
+    throttle.succeeded('burst');
+    expect(throttle.reserve('burst')).toBe(true);
   });
 });

@@ -124,7 +124,7 @@ function credentialRoutes(options: LocalAuthOptions) {
   routes.post('/auth/login', async (context) => {
     const parsed = await input(context, loginSchema);
     const key = normalizeUsername(parsed.username);
-    if (!throttle.allowed(key))
+    if (!throttle.reserve(key))
       throw new BusinessException(
         'INVALID_CREDENTIALS',
         '用户名或密码不正确，请重试',

@@ -4,5 +4,8 @@ export default defineConfig({
     include: ['tests/integration/**/*.test.ts'],
     allowOnly: false,
     passWithNoTests: false,
+    // Suites share one task-owned MySQL schema, so files run sequentially.
+    fileParallelism: false,
+    sequence: { concurrent: false },
   },
 });
