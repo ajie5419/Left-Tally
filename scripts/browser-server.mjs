@@ -1,99 +1,85 @@
-import { createServer } from 'node:http';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve, extname, sep } from 'node:path';
-import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createConnection } from 'mysql2/promise';
+import { withBusinessDatabase } from './business-database.mjs';
+import { migrateBusinessDatabase } from './business-migrations.mjs';
+import { startBusinessBrowser } from './business-browser.mjs';
+import { allocatePort } from './database-isolation.mjs';
 
-const require = createRequire(resolve('apps/api/package.json'));
-const { serve } = require('@hono/node-server');
-const { app } = await import('../apps/api/dist/apps/api/src/app.js');
-const api = serve({ fetch: app.fetch, hostname: '127.0.0.1', port: 0 });
-await new Promise((accept) => api.once('listening', accept));
-const apiAddress = api.address();
-if (!apiAddress || typeof apiAddress === 'string')
-  throw new Error('Unknown API listener');
-const root = resolve('apps/web/dist');
-const contentTypes = {
-  '.html': 'text/html',
-  '.js': 'application/javascript',
-  '.css': 'text/css',
-  '.svg': 'image/svg+xml',
-};
-const web = createServer(async (request, response) => {
+await withBusinessDatabase(async (url) => {
+  migrateBusinessDatabase(url);
+  const { createLocalAuthDemo } =
+    await import('../apps/api/dist/tests/support/local-auth-demo.js');
+  const port = await allocatePort();
+  const demo = await createLocalAuthDemo(url, `http://127.0.0.1:${port}`);
+  const web = await startBusinessBrowser(demo, port);
   try {
-    const pathname = new URL(request.url, 'http://localhost').pathname;
-    if (['/health', '/openapi.json'].includes(pathname)) {
-      const upstream = await fetch(
-        `http://127.0.0.1:${apiAddress.port}${pathname}`,
+    const environment = { ...process.env };
+    delete environment.NO_COLOR;
+    delete environment.FORCE_COLOR;
+    for (const project of ['desktop', 'mobile']) {
+      const connection = await createConnection(url);
+      try {
+        await connection.query('DELETE FROM WorkOrder');
+      } finally {
+        await connection.end();
+      }
+      const child = spawn(
+        'pnpm',
+        [
+          'exec',
+          'playwright',
+          'test',
+          '--config',
+          'config/playwright.config.ts',
+          '--project',
+          project,
+        ],
+        {
+          stdio: 'inherit',
+          env: {
+            ...environment,
+            PLAYWRIGHT_BROWSERS_PATH:
+              process.env.PLAYWRIGHT_BROWSERS_PATH ??
+              resolve('.tools/playwright'),
+            GC_BROWSER_URL: web.url,
+            GC_BROWSER_PROJECT: project,
+            GC_DEMO_ADMIN: demo.credentials.admin.username,
+            GC_DEMO_ADMIN_PASSWORD: demo.credentials.admin.password,
+            GC_DEMO_CREATOR: demo.credentials.creator.username,
+            GC_DEMO_CREATOR_PASSWORD: demo.credentials.creator.password,
+            GC_DEMO_READER: demo.credentials.reader.username,
+            GC_DEMO_READER_PASSWORD: demo.credentials.reader.password,
+          },
+        },
       );
-      response.writeHead(upstream.status, {
-        'Content-Type': 'application/json',
-      });
-      response.end(await upstream.text());
-      return;
+      const timeout = setTimeout(() => child.kill('SIGTERM'), 120_000);
+      const code = await new Promise((accept, reject) => {
+        child.once('error', reject);
+        child.once('exit', (status) => accept(status ?? 1));
+      }).finally(() => clearTimeout(timeout));
+      if (code !== 0) throw new Error(`BROWSER_TEST_FAILED exit=${code}`);
     }
-    const path = resolve(root, `.${decodeURIComponent(pathname)}`);
-    if (!path.startsWith(`${root}${sep}`) && path !== root) {
-      response.writeHead(403);
-      response.end();
-      return;
-    }
-    const file =
-      path !== root && existsSync(path) ? path : resolve(root, 'index.html');
-    response.writeHead(200, {
-      'Content-Type': contentTypes[extname(file)] ?? 'application/octet-stream',
-    });
-    response.end(readFileSync(file));
-  } catch (error) {
-    console.error(error);
-    response.writeHead(500);
-    response.end('Test server failure');
+    const reports = ['desktop', 'mobile'].map((project) =>
+      JSON.parse(
+        readFileSync(`evidence/bootstrap/browser-${project}.json`, 'utf8'),
+      ),
+    );
+    const stats = { expected: 0, unexpected: 0, skipped: 0, flaky: 0 };
+    for (const report of reports)
+      for (const key of Object.keys(stats)) stats[key] += report.stats[key];
+    writeFileSync(
+      'evidence/bootstrap/browser-results.json',
+      JSON.stringify(
+        { stats, suites: reports.flatMap((report) => report.suites) },
+        null,
+        2,
+      ) + '\n',
+    );
+  } finally {
+    await web.close();
+    await demo.database.close();
+    console.log('FINITE_BROWSER_SERVERS_CLEANED');
   }
 });
-web.listen(0, '127.0.0.1');
-await new Promise((accept) => web.once('listening', accept));
-const address = web.address();
-if (!address || typeof address === 'string')
-  throw new Error('Unknown web listener');
-console.log(
-  `FINITE_BROWSER_SERVERS api=${apiAddress.port} web=${address.port}`,
-);
-const browserEnvironment = { ...process.env };
-delete browserEnvironment.NO_COLOR;
-delete browserEnvironment.FORCE_COLOR;
-const child = spawn(
-  'pnpm',
-  ['exec', 'playwright', 'test', '--config', 'config/playwright.config.ts'],
-  {
-    stdio: 'inherit',
-    env: {
-      ...browserEnvironment,
-      PLAYWRIGHT_BROWSERS_PATH:
-        process.env.PLAYWRIGHT_BROWSERS_PATH ?? resolve('.tools/playwright'),
-      GC_BROWSER_URL: `http://127.0.0.1:${address.port}`,
-    },
-  },
-);
-const timeout = setTimeout(() => child.kill('SIGTERM'), 120_000);
-function cleanup() {
-  child.kill('SIGTERM');
-  web.close();
-  api.close();
-}
-process.once('SIGTERM', cleanup);
-process.once('SIGINT', cleanup);
-const code = await new Promise((accept) => {
-  child.once('error', (error) => {
-    console.error(error);
-    accept(1);
-  });
-  child.once('exit', (status) => accept(status ?? 1));
-});
-clearTimeout(timeout);
-web.closeAllConnections();
-await Promise.all([
-  new Promise((accept) => web.close(accept)),
-  new Promise((accept) => api.close(accept)),
-]);
-console.log('FINITE_BROWSER_SERVERS_CLEANED');
-process.exitCode = code;

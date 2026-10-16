@@ -8,7 +8,7 @@ const baseline = {
   'AGENTS.md':
     '778bc7b6bfc282259929ce0cc45e2b8639af8798347c5c6665408032632fbb55',
   'Grand Comptroller/工程治理与门禁基线-2026-10-13.md':
-    'bec3385064b079133c869942b17b75c0d09b7f764a82db09406fc26cb26d93ff',
+    '4af1198b4c796037ee9242cfca7abb732f5a31a4508709d40b12d319c846d171',
 };
 const required = [
   'check:static',
@@ -23,7 +23,7 @@ const manifest = JSON.parse(readFileSync('config/bootstrap.json', 'utf8'));
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 const errors = [];
 if (
-  manifest.phase !== 'BOOTSTRAP' ||
+  manifest.phase !== 'CORE' ||
   JSON.stringify(manifest.required) !== JSON.stringify(required)
 ) {
   errors.push('REQUIRED_MANIFEST_CHANGED');

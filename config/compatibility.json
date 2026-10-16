@@ -19,11 +19,11 @@
     "adapter": "@prisma/adapter-mariadb@7.10.0",
     "underlyingDriver": "mariadb@3.4.5",
     "nodeEngine": "^20.19 || ^22.12 || >=24.0",
-    "installed": false,
-    "runtimeVerified": false,
+    "installed": true,
+    "runtimeVerified": true,
     "probeDriverOnly": "mysql2@3.16.1",
     "requestedDatabaseLine": "MySQL 8.4",
-    "schemaImplemented": false
+    "schemaImplemented": true
   },
   "sources": [
     "https://nodejs.org/dist/index.json",

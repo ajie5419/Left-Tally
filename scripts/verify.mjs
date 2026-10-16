@@ -55,7 +55,7 @@ const gitHead = spawnSync('rtk', ['git', 'rev-parse', 'HEAD'], {
   encoding: 'utf8',
 });
 const report = {
-  phase: 'BOOTSTRAP',
+  phase: 'CORE',
   node: process.versions.node,
   pnpm: pnpmVersion.stdout.trim(),
   environmentValid,
@@ -103,5 +103,5 @@ report.success =
   changed.length === 0 &&
   report.evidenceErrors.length === 0;
 writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
-console.log(`verify: ${report.success ? 'PASS' : 'FAIL'} (BOOTSTRAP only)`);
+console.log(`verify: ${report.success ? 'PASS' : 'FAIL'} (CORE B01 only)`);
 process.exitCode = report.success ? 0 : 1;

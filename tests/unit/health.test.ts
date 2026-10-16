@@ -627,9 +627,14 @@ describe('global error handling and HTTP status mapping', () => {
 describe('BusinessErrorCode enum and status mapping', () => {
   it('strictly defines and freezes error codes and status mapping', () => {
     expect(Object.keys(BusinessErrorCode).sort()).toEqual([
+      'ACCOUNT_LAST_ADMIN',
+      'ACCOUNT_USERNAME_EXISTS',
       'FORBIDDEN',
+      'INVALID_CREDENTIALS',
       'NOT_FOUND',
+      'SOURCE_UNAVAILABLE',
       'VALIDATION_FAILED',
+      'WORK_ORDER_NUMBER_EXISTS',
     ]);
     expect(BusinessErrorCode.FORBIDDEN).toBe('FORBIDDEN');
     expect(BusinessErrorCode.NOT_FOUND).toBe('NOT_FOUND');
@@ -640,5 +645,10 @@ describe('BusinessErrorCode enum and status mapping', () => {
     expect(BusinessErrorHttpStatusMap.VALIDATION_FAILED).toBe(400);
     expect(BusinessErrorHttpStatusMap.FORBIDDEN).toBe(403);
     expect(BusinessErrorHttpStatusMap.NOT_FOUND).toBe(404);
+    expect(BusinessErrorHttpStatusMap.WORK_ORDER_NUMBER_EXISTS).toBe(409);
+    expect(BusinessErrorHttpStatusMap.ACCOUNT_USERNAME_EXISTS).toBe(409);
+    expect(BusinessErrorHttpStatusMap.INVALID_CREDENTIALS).toBe(403);
+    expect(BusinessErrorHttpStatusMap.ACCOUNT_LAST_ADMIN).toBe(409);
+    expect(BusinessErrorHttpStatusMap.SOURCE_UNAVAILABLE).toBe(503);
   });
 });
