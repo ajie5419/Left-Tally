@@ -6,6 +6,7 @@ import { serverConfig } from '../../apps/api/src/server-config.js';
 import { businessOpenApi } from '../../apps/api/src/openapi.js';
 import { createProductionAdapters } from '../../apps/api/src/runtime-adapters.js';
 import {
+  z,
   sessionSchema,
   successResponseSchema,
   type Principal,
@@ -169,4 +170,38 @@ it('publishes strict business request and response schemas without inventing an 
   ).toBe(false);
   expect(JSON.stringify(businessOpenApi)).not.toContain('/demo/');
   expect(businessOpenApi['x-authentication'].status).toBe('gc-local-account');
+});
+it('declares every templated account path parameter and its not-found response', () => {
+  const paths = z
+    .record(
+      z.string(),
+      z.record(
+        z.string(),
+        z.object({
+          parameters: z
+            .array(
+              z.object({
+                name: z.string(),
+                in: z.string(),
+                required: z.boolean().optional(),
+              }),
+            )
+            .optional(),
+          responses: z.record(z.string(), z.unknown()),
+        }),
+      ),
+    )
+    .parse(JSON.parse(JSON.stringify(businessOpenApi.paths)));
+  for (const path of [
+    '/api/accounts/{id}/permissions',
+    '/api/accounts/{id}/reset-password',
+    '/api/accounts/{id}/active',
+  ]) {
+    const operation = Object.values(paths[path] ?? {})[0];
+    if (!operation) throw new Error(`MISSING_OPENAPI_OPERATION: ${path}`);
+    expect(operation.parameters).toEqual([
+      expect.objectContaining({ name: 'id', in: 'path', required: true }),
+    ]);
+    expect(operation.responses['404']).toBeDefined();
+  }
 });

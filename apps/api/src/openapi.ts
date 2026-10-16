@@ -50,6 +50,10 @@ const failures = {
     description: 'Local account persistence or personnel source is unavailable',
     content: json(failureResponseSchema),
   },
+  '404': {
+    description: 'NOT_FOUND: no account matches the supplied UUID',
+    content: json(failureResponseSchema),
+  },
 };
 export const businessOpenApi = {
   ...healthOpenApi,
@@ -166,6 +170,7 @@ export const businessOpenApi = {
             content: success(accountSchema),
           },
           ...failures,
+          '404': failures['404'],
           '409': {
             description: 'ACCOUNT_LAST_ADMIN',
             content: json(failureResponseSchema),
@@ -188,6 +193,7 @@ export const businessOpenApi = {
             content: success(accountSchema),
           },
           ...failures,
+          '404': failures['404'],
         },
       },
     },
@@ -206,6 +212,7 @@ export const businessOpenApi = {
             content: success(accountSchema),
           },
           ...failures,
+          '404': failures['404'],
           '409': {
             description: 'ACCOUNT_LAST_ADMIN',
             content: json(failureResponseSchema),
