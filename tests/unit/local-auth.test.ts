@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DUMMY_PASSWORD_HASH,
   hashPassword,
   hashSessionToken,
   normalizeUsername,
@@ -17,6 +18,9 @@ describe('local account primitives', () => {
     await expect(verifyPassword(password, hash)).resolves.toBe(true);
     await expect(verifyPassword(`${password} `, hash)).resolves.toBe(false);
     await expect(verifyPassword(password, 'scrypt$broken')).resolves.toBe(
+      false,
+    );
+    await expect(verifyPassword(password, DUMMY_PASSWORD_HASH)).resolves.toBe(
       false,
     );
   });

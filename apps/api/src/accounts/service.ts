@@ -9,6 +9,7 @@ import type {
 } from '@gc/contracts';
 import { BusinessException } from '../business-error.js';
 import {
+  DUMMY_PASSWORD_HASH,
   hashPassword,
   hashSessionToken,
   normalizeUsername,
@@ -151,12 +152,11 @@ export class LocalAccounts {
       throw persistenceFailure();
     }
     await this.hooks?.onLoginAccountLoaded?.(account);
-    if (
-      !account ||
-      !account.active ||
-      !(await verifyPassword(password, account.passwordHash))
-    )
-      return null;
+    const valid = await verifyPassword(
+      password,
+      account && account.active ? account.passwordHash : DUMMY_PASSWORD_HASH,
+    );
+    if (!account || !account.active || !valid) return null;
     const token = randomSessionToken();
     try {
       const session = await this.transaction(async (tx) => {

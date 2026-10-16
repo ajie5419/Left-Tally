@@ -56,3 +56,10 @@ export function randomSessionToken() {
 export function hashSessionToken(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
+
+/**
+ * Pre-encoded scrypt hash with matching parameters so missing or inactive accounts
+ * perform the same expensive scrypt work, preventing remote timing enumeration.
+ */
+export const DUMMY_PASSWORD_HASH =
+  'scrypt$16384$AAAAAAAAAAAAAAAAAAAAAA$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
