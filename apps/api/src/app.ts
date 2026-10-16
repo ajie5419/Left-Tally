@@ -1,50 +1,14 @@
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import {
-  healthOpenApi,
-  fail,
-  type BusinessErrorCodeType,
-  type FailureResponse,
-  type JsonValue,
-} from '@gc/contracts';
+import { healthOpenApi, fail } from '@gc/contracts';
 import { healthRoutes } from './routes/health.js';
-
-export type BusinessHttpStatus = 400 | 403 | 404;
-
-export const BusinessErrorHttpStatusMap: Readonly<
-  Record<BusinessErrorCodeType, BusinessHttpStatus>
-> = Object.freeze({
-  VALIDATION_FAILED: 400,
-  NOT_FOUND: 404,
-  FORBIDDEN: 403,
-});
-
-export class BusinessException extends Error {
-  readonly code: BusinessErrorCodeType;
-  readonly status: BusinessHttpStatus;
-  readonly details?: JsonValue | undefined;
-
-  constructor(
-    code: BusinessErrorCodeType,
-    message: string,
-    details?: JsonValue,
-  ) {
-    const trimmed = message.trim();
-    const resolvedMessage =
-      trimmed.length > 0
-        ? trimmed
-        : `Business operation failed with code '${code}'`;
-    super(resolvedMessage);
-    this.name = 'BusinessException';
-    this.code = code;
-    this.status = BusinessErrorHttpStatusMap[code];
-    this.details = details;
-  }
-
-  toResponse(timestamp: string): FailureResponse {
-    return fail(this.code, this.message, this.details, timestamp);
-  }
-}
+import { BusinessException } from './business-error.js';
+import { businessOpenApi } from './openapi.js';
+export {
+  BusinessException,
+  BusinessErrorHttpStatusMap,
+  type BusinessHttpStatus,
+} from './business-error.js';
 
 function handleBusinessException(
   err: BusinessException,
@@ -112,7 +76,7 @@ function handleHttpException(
   return context.json(fail(code, message, undefined, now), status);
 }
 
-export function createServerApp(): Hono {
+export function createServerApp(businessRoutes?: Hono): Hono {
   return new Hono()
     .notFound((context) => {
       const now = new Date().toISOString();
@@ -141,7 +105,10 @@ export function createServerApp(): Hono {
       );
     })
     .route('/', healthRoutes)
-    .get('/openapi.json', (context) => context.json(healthOpenApi));
+    .route('/api', businessRoutes ?? new Hono())
+    .get('/openapi.json', (context) =>
+      context.json(businessRoutes ? businessOpenApi : healthOpenApi),
+    );
 }
 
 export const app = createServerApp();
