@@ -89,7 +89,9 @@ test('administrator manages an account and is not granted work order access auto
   const base = process.env.GC_BROWSER_URL;
   if (!base) throw new Error('Missing finite browser server');
   await page.goto(`${base}/accounts`);
-  await expect(page.getByRole('heading', { name: '账户管理' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '账户管理', exact: true }),
+  ).toBeVisible();
   await page.getByLabel('账号').fill(`demo.reader.${info.project.name}`);
   await page.getByLabel('姓名').fill('新建只读人员');
   await page.getByLabel('初始密码').fill('New-demo-password-2026');
