@@ -8,7 +8,7 @@ export function resultErrors(report) {
   try {
     if (
       report.environmentValid !== true ||
-      report.phase !== 'BOOTSTRAP' ||
+      report.phase !== 'CORE' ||
       report.node !== '24.21.0' ||
       report.pnpm !== '10.28.2' ||
       report.sourceHashFile !==
@@ -61,7 +61,9 @@ export function resultErrors(report) {
       readFileSync('evidence/bootstrap/browser-results.json', 'utf8'),
     );
     if (
-      browser.stats.expected !== 2 ||
+      browser.stats.expected !==
+        JSON.parse(readFileSync('config/bootstrap.json', 'utf8'))
+          .browserExpectedTests ||
       browser.stats.unexpected !== 0 ||
       browser.stats.skipped !== 0 ||
       browser.stats.flaky !== 0
@@ -109,17 +111,14 @@ export function resultErrors(report) {
       if (probe.sourceSha256?.[path] !== hashes[path])
         errors.push(`RESULT_PROBE_SOURCE_MISSING: ${path}`);
     }
-    const migrationLog = readFileSync(
-      'evidence/bootstrap/verify/check-migrations.log',
-      'utf8',
-    );
     const migrations = JSON.parse(
-      migrationLog.slice(migrationLog.indexOf('{')),
+      readFileSync('evidence/bootstrap/business-migrations.json', 'utf8'),
     );
     if (
-      migrations.applicability !== 'INITIAL_NO_SCHEMA_NO_PREVIOUS_DELIVERY' ||
-      migrations.migrationExecuted !== false ||
-      migrations.schemaFound !== false ||
+      migrations.applicability !==
+        'INITIAL_BUSINESS_SCHEMA_NO_PREVIOUS_BUSINESS_DELIVERY' ||
+      migrations.migrationExecuted !== true ||
+      migrations.schemaFound !== true ||
       migrations.previousDeliveryFound !== false
     )
       errors.push('RESULT_MIGRATION_APPLICABILITY_INVALID');

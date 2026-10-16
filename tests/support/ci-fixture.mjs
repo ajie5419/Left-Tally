@@ -34,7 +34,7 @@ const units = {
   })),
 };
 const report = {
-  phase: 'BOOTSTRAP',
+  phase: 'CORE',
   environmentValid: true,
   node: '24.21.0',
   pnpm: '10.28.2',
@@ -57,7 +57,7 @@ for (const result of report.results) {
     'ISOLATED CHECKER INPUT FIXTURE; NOT A REAL EXECUTION\n',
   );
 }
-const browser = { stats: { expected: 2, unexpected: 0, skipped: 0, flaky: 0 } };
+const browser = { stats: { expected: 8, unexpected: 0, skipped: 0, flaky: 0 } };
 if (scenario === 'failed-task') report.results[0].exitCode = 1;
 if (scenario === 'missing-task') report.results.shift();
 if (scenario === 'skip-unit') units.numPendingTests = 1;
@@ -93,17 +93,12 @@ put('evidence/bootstrap/database-probe.json', {
 });
 put(report.sourceHashFile, snapshot);
 put('evidence/bootstrap/verify/results.json', report);
-writeFileSync(
-  join(directory, 'evidence/bootstrap/verify/check-migrations.log'),
-  'ISOLATED CHECKER FIXTURE\n' +
-    JSON.stringify({
-      applicability: 'INITIAL_NO_SCHEMA_NO_PREVIOUS_DELIVERY',
-      migrationExecuted: false,
-      schemaFound: false,
-      previousDeliveryFound: false,
-    }) +
-    '\n',
-);
+put('evidence/bootstrap/business-migrations.json', {
+  applicability: 'INITIAL_BUSINESS_SCHEMA_NO_PREVIOUS_BUSINESS_DELIVERY',
+  migrationExecuted: true,
+  schemaFound: true,
+  previousDeliveryFound: false,
+});
 if (scenario === 'missing-result')
   rmSync(join(directory, 'evidence/bootstrap/verify/results.json'));
 if (scenario === 'delete-unit-artifact')

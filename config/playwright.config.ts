@@ -9,7 +9,13 @@ export default defineConfig({
     ['list'],
     [
       'json',
-      { outputFile: resolve('evidence/bootstrap/browser-results.json') },
+      {
+        outputFile: resolve(
+          process.env['GC_BROWSER_PROJECT']
+            ? `evidence/bootstrap/browser-${process.env['GC_BROWSER_PROJECT']}.json`
+            : 'evidence/bootstrap/browser-results.json',
+        ),
+      },
     ],
   ],
   outputDir: '../test-results',

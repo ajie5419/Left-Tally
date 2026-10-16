@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 import { healthOpenApi } from '@gc/contracts';
+import { businessOpenApi } from '../../apps/api/src/openapi.js';
 
 test('bootstrap page handles real health, failure and recovery', async ({
   page,
@@ -11,8 +12,8 @@ test('bootstrap page handles real health, failure and recovery', async ({
   if (!base) throw new Error('Missing finite test server URL');
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto(base);
-  await expect(page.getByText('工程初始化，尚无正式业务功能')).toBeVisible();
+  await page.goto(`${base}/engineering`);
+  await expect(page.getByText('当前开放：工单新建与查看')).toBeVisible();
   await expect(page.getByRole('heading', { name: '工程状态' })).toBeVisible();
   await page.getByRole('button', { name: '检测健康接口' }).click();
   await expect(page.getByRole('status')).toHaveText('健康接口已响应');
@@ -26,7 +27,10 @@ test('bootstrap page handles real health, failure and recovery', async ({
   const documentation = await request.get(`${base}/openapi.json`);
   const published: unknown = await documentation.json();
   expect(documentation.status()).toBe(200);
-  expect(published).toEqual(healthOpenApi);
+  expect(published).toEqual(businessOpenApi);
+  expect(businessOpenApi.paths['/health']).toEqual(
+    healthOpenApi.paths['/health'],
+  );
   console.log(
     JSON.stringify({
       project: info.project.name,

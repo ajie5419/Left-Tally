@@ -4,6 +4,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 const directory = 'evidence/bootstrap/static';
 mkdirSync(directory, { recursive: true });
 const commands = [
+  'db:generate',
   'check:types',
   'check:lint',
   'check:format',
