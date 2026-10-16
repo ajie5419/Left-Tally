@@ -1,31 +1,31 @@
 # Grand Comptroller
 
-履约管理系统。当前处于工程初始化阶段（BOOTSTRAP）：已有最小前后端、共享契约和检查门禁，尚无正式业务功能。
+履约管理系统。当前处于 CORE 阶段，B01 已提供本系统新建和查看设备工单，生产负责人由生产部后续指定；登录与账户管理采用 GC 本地独立账号方案（`LocalAccount` / `LocalSession`），不依赖 QMS 身份桥。用户已于 2026-10-16 明确确认独立账号登录与工单新建查看的业务验收完成。操作见 [B01 交付说明](Grand%20Comptroller/B01-工单关联交付与验收-2026-10-15.md) 与 [独立账号登录交付记录](Grand%20Comptroller/独立账号登录交付记录-2026-10-16.md)，运行配置、账户管理契约及验证边界见 [API 说明](apps/api/README.md)。
 
 ## 先读这些
 
-| 文档 | 用途 |
-| --- | --- |
-| [AGENTS.md](AGENTS.md) | 工作方式：业务验收优先、Git 与 PR 规则、禁止事项 |
-| [需求基线](Grand%20Comptroller/需求基线-2026-10-13.md) | 业务需求范围 |
-| [第一条业务链验收场景](Grand%20Comptroller/验收场景-第一条业务链-2026-10-15.md) | 验收场景的写法和第一批场景 |
-| [工程治理与门禁基线](Grand%20Comptroller/工程治理与门禁基线-2026-10-13.md) | 工程约束、门禁和已批准例外 |
-| [技术栈与工程架构](Grand%20Comptroller/技术栈与工程架构-2026-10-13.md) | 技术选型 |
-| [apps/api/README.md](apps/api/README.md) | 后端接口的实际响应契约 |
+| 文档                                                                            | 用途                                             |
+| ------------------------------------------------------------------------------- | ------------------------------------------------ |
+| [AGENTS.md](AGENTS.md)                                                          | 工作方式：业务验收优先、Git 与 PR 规则、禁止事项 |
+| [需求基线](Grand%20Comptroller/需求基线-2026-10-13.md)                          | 业务需求范围                                     |
+| [第一条业务链验收场景](Grand%20Comptroller/验收场景-第一条业务链-2026-10-15.md) | 验收场景的写法和第一批场景                       |
+| [工程治理与门禁基线](Grand%20Comptroller/工程治理与门禁基线-2026-10-13.md)      | 工程约束、门禁和已批准例外                       |
+| [技术栈与工程架构](Grand%20Comptroller/技术栈与工程架构-2026-10-13.md)          | 技术选型                                         |
+| [apps/api/README.md](apps/api/README.md)                                        | 后端接口的实际响应契约                           |
 
 ## 目录
 
-| 路径 | 内容 |
-| --- | --- |
-| `apps/web` | Vue 前端（最小页面） |
-| `apps/api` | Hono 后端（健康接口与统一错误响应） |
-| `packages/contracts` | 前后端共享契约（Zod） |
-| `tests/` | 单元测试、浏览器测试及测试辅助 |
-| `scripts/` | 检查、门禁与验证脚本 |
-| `config/` | 测试、门禁与工具配置 |
-| `Grand Comptroller/` | 需求、设计、原型与治理文档 |
-| `evidence/` | 本地验证证据，不进入 Git；仅 `evidence/bootstrap/opening-sha256.json` 入库 |
-| `.tools/` | 项目内工具链（Node、pnpm、浏览器、CI 工具），不进入 Git |
+| 路径                 | 内容                                                                       |
+| -------------------- | -------------------------------------------------------------------------- |
+| `apps/web`           | Vue 前端（最小页面）                                                       |
+| `apps/api`           | Hono 后端（健康接口与统一错误响应）                                        |
+| `packages/contracts` | 前后端共享契约（Zod）                                                      |
+| `tests/`             | 单元测试、浏览器测试及测试辅助                                             |
+| `scripts/`           | 检查、门禁与验证脚本                                                       |
+| `config/`            | 测试、门禁与工具配置                                                       |
+| `Grand Comptroller/` | 需求、设计、原型与治理文档                                                 |
+| `evidence/`          | 本地验证证据，不进入 Git；仅 `evidence/bootstrap/opening-sha256.json` 入库 |
+| `.tools/`            | 项目内工具链（Node、pnpm、浏览器、CI 工具），不进入 Git                    |
 
 ## 工具链
 
@@ -63,15 +63,15 @@ PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright" "$GC_NODE" scripts/toolchain.m
 
 均以 `"$GC_NODE" scripts/toolchain.mjs pnpm <命令>` 运行。
 
-| 命令 | 作用 |
-| --- | --- |
-| `check:static` | 类型、lint、格式、依赖边界、源码规则、锁文件 |
-| `test:unit` | 单元测试 |
-| `build` | 构建前端和后端 |
-| `test:integration` | 在临时 MySQL 容器中做数据库隔离探针 |
-| `test:e2e` | 浏览器测试（桌面与手机尺寸） |
-| `test:negative` | 门禁负向样例：确认违规能被拦截 |
-| `verify` | 按顺序运行以上全部及迁移检查，再由门禁核对结果 |
+| 命令               | 作用                                           |
+| ------------------ | ---------------------------------------------- |
+| `check:static`     | 类型、lint、格式、依赖边界、源码规则、锁文件   |
+| `test:unit`        | 单元测试                                       |
+| `build`            | 构建前端和后端                                 |
+| `test:integration` | 在临时 MySQL 容器中做数据库隔离探针            |
+| `test:e2e`         | 浏览器测试（桌面与手机尺寸）                   |
+| `test:negative`    | 门禁负向样例：确认违规能被拦截                 |
+| `verify`           | 按顺序运行以上全部及迁移检查，再由门禁核对结果 |
 
 `verify` 的结果在 `evidence/bootstrap/verify/results.json`，各项日志在同一目录。
 
