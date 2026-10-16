@@ -44,11 +44,6 @@ function leadName(id: string | null) {
   if (id === null) return '待生产部指定';
   return store.leads.find((lead) => lead.id === id)?.name ?? '负责人信息待核实';
 }
-function openOrder(id: string) {
-  void router.push(`/work-orders/${id}`).catch(() => {
-    store.error = '无法打开工单明细，请重试';
-  });
-}
 </script>
 
 <template>
@@ -101,7 +96,6 @@ function openOrder(id: string) {
         <li v-for="order in store.orders" :key="order.id">
           <div class="order-title">
             <strong>{{ order.number }}</strong>
-            <AButton @click="openOrder(order.id)">查看派工</AButton>
           </div>
           <dl>
             <div>

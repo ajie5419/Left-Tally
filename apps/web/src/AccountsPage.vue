@@ -11,6 +11,8 @@ const accounts = ref<Account[]>([]);
 const error = ref('');
 const notice = ref('');
 const loading = ref(false);
+const savingAccounts = ref<Record<string, boolean>>({});
+const permissionQueues = new Map<string, Promise<void>>();
 const form = reactive({
   username: '',
   name: '',
@@ -21,10 +23,17 @@ const form = reactive({
 });
 
 function permissions(read: boolean, create: boolean) {
-  const result = new Set<string>();
+  const result = new Set<Account['permissions'][number]>();
   if (read || create) result.add('work-orders:read');
   if (create) result.add('work-orders:create');
   return [...result];
+}
+
+function queueAccountSave(accountId: string, task: () => Promise<void>) {
+  const current = permissionQueues.get(accountId) ?? Promise.resolve();
+  const next = current.then(task, task);
+  permissionQueues.set(accountId, next);
+  return next;
 }
 
 async function load() {
@@ -78,19 +87,26 @@ async function savePermissions(
   create: boolean,
   accountAdmin: boolean,
 ) {
-  error.value = '';
-  notice.value = '';
-  try {
-    await store.updatePermissions(account.id, {
-      permissions: permissions(read, create),
-      accountAdmin,
-    });
-    notice.value = `已更新 ${account.name} 的权限；该账户需要重新登录。`;
-    await load();
-  } catch (cause) {
-    error.value =
-      cause instanceof Error ? cause.message : '更新权限失败，请重试';
-  }
+  account.permissions = permissions(read, create);
+  account.accountAdmin = accountAdmin;
+  return queueAccountSave(account.id, async () => {
+    savingAccounts.value[account.id] = true;
+    error.value = '';
+    notice.value = '';
+    try {
+      await store.updatePermissions(account.id, {
+        permissions: account.permissions,
+        accountAdmin: account.accountAdmin,
+      });
+      notice.value = `已更新 ${account.name} 的权限；该账户需要重新登录。`;
+    } catch (cause) {
+      error.value =
+        cause instanceof Error ? cause.message : '更新权限失败，请重试';
+      await load();
+    } finally {
+      savingAccounts.value[account.id] = false;
+    }
+  });
 }
 
 async function reset(account: Account, password: string) {
@@ -207,6 +223,7 @@ onMounted(async () => {
       <div class="account-actions">
         <label>
           <input
+            :disabled="Boolean(savingAccounts[account.id])"
             :checked="account.permissions.includes('work-orders:read')"
             type="checkbox"
             @change="
@@ -222,6 +239,7 @@ onMounted(async () => {
         </label>
         <label>
           <input
+            :disabled="Boolean(savingAccounts[account.id])"
             :checked="account.permissions.includes('work-orders:create')"
             type="checkbox"
             @change="
@@ -237,6 +255,7 @@ onMounted(async () => {
         </label>
         <label>
           <input
+            :disabled="Boolean(savingAccounts[account.id])"
             :checked="account.accountAdmin"
             type="checkbox"
             @change="

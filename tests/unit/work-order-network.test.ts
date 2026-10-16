@@ -100,3 +100,8 @@ it('clears the actionable identity and previous orders after refresh and create 
   expect(store.orders).toHaveLength(0);
   expect(store.error).toBe('服务连接失败，请检查网络后重试。');
 });
+it('translates local schema failures during login to user-facing error message', async () => {
+  const store = useWorkOrderStore(createPinia());
+  await store.login('ab', 'short');
+  expect(store.error).toBe('用户名或密码不正确，请重试');
+});

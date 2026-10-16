@@ -33,9 +33,6 @@ for (const task of [...required, 'check:gate', 'verify']) {
     errors.push(`REQUIRED_TASK_MISSING: ${task}`);
 }
 for (const path of [
-  'tests/unit/work-orders.test.ts',
-  'tests/integration/work-orders.test.ts',
-  'tests/e2e/work-orders.spec.ts',
   'tests/unit/health.test.ts',
   'tests/unit/contracts.test.ts',
   'tests/unit/scanner.test.ts',

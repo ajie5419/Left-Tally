@@ -118,12 +118,17 @@ export const useWorkOrderStore = defineStore('work-orders', {
       this.notice = '';
       this.clearIdentity();
       const version = this.identityVersion;
+      const parsed = loginSchema.safeParse({ username, password });
+      if (!parsed.success) {
+        if (version !== this.identityVersion) return;
+        this.error = '用户名或密码不正确，请重试';
+        return;
+      }
       try {
-        const input = loginSchema.parse({ username, password });
         const result = await request(
           '/auth/login',
           z.object({ principal: principalSchema }).strict(),
-          input,
+          parsed.data,
         );
         const identity = result.principal;
         if (version !== this.identityVersion) return;

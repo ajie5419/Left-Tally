@@ -36,6 +36,7 @@ async function submit() {
         v-model="form.username"
         autocomplete="username"
         required
+        minlength="3"
         maxlength="64"
       />
       <label for="password">密码</label>
