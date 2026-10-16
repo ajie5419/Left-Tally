@@ -28,6 +28,15 @@ const success = (schema: z.ZodType) =>
       })
       .strict(),
   );
+const accountId = [
+  {
+    name: 'id',
+    in: 'path',
+    required: true,
+    description: 'Local account UUID',
+    schema: { type: 'string', format: 'uuid' },
+  },
+];
 const failures = {
   '400': {
     description: 'Invalid input or malformed JSON',
@@ -146,6 +155,7 @@ export const businessOpenApi = {
       put: {
         summary: 'Set read/create permissions and account-admin capability',
         'x-required-capability': 'account-admin',
+        parameters: accountId,
         requestBody: {
           required: true,
           content: json(updateAccountPermissionsSchema, 'input'),
@@ -167,6 +177,7 @@ export const businessOpenApi = {
       post: {
         summary: 'Reset a password and revoke its sessions',
         'x-required-capability': 'account-admin',
+        parameters: accountId,
         requestBody: {
           required: true,
           content: json(resetPasswordSchema, 'input'),
@@ -184,6 +195,7 @@ export const businessOpenApi = {
       put: {
         summary: 'Enable or disable a local account',
         'x-required-capability': 'account-admin',
+        parameters: accountId,
         requestBody: {
           required: true,
           content: json(updateAccountActiveSchema, 'input'),
