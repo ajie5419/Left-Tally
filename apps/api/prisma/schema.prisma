@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model IdentitySession {
+  idHash          String   @id @db.Char(64)
+  credential      String   @db.Text
+  expiresAt       DateTime @db.DateTime(3)
+  createdAt       DateTime @default(now()) @db.DateTime(3)
+
+  @@index([expiresAt])
+}
+
+/// GC-local account; it is intentionally unrelated to any external identity system.
+model LocalAccount {
+  id                 String         @id @db.Char(36)
+  username           String         @db.VarChar(64)
+  usernameNormalized String         @unique @db.VarChar(64)
+  name               String         @db.VarChar(128)
+  passwordHash       String         @db.Text
+  canRead            Boolean        @default(false)
+  canCreate          Boolean        @default(false)
+  accountAdmin       Boolean        @default(false)
+  active             Boolean        @default(true)
+  authVersion        Int            @default(0)
+  createdAt          DateTime       @default(now()) @db.DateTime(3)
+  updatedAt          DateTime       @updatedAt @db.DateTime(3)
+  sessions           LocalSession[]
+
+  @@unique([username])
+  @@index([active, accountAdmin])
+}
+
+/// Opaque browser tokens are never persisted; only this SHA-256 digest is stored.
+model LocalSession {
+  idHash      String       @id @db.Char(64)
+  accountId   String       @db.Char(36)
+  authVersion Int
+  expiresAt   DateTime     @db.DateTime(3)
+  createdAt   DateTime     @default(now()) @db.DateTime(3)
+  account     LocalAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([expiresAt])
+}
+
+model WorkOrder {
+  id               String   @id @db.VarChar(36)
+  number           String   @unique @db.VarChar(128)
+  customer         String   @db.VarChar(200)
+  quantity         Int
+  dueDate          DateTime @db.Date
+  project          String?  @db.VarChar(200)
+  division         String?  @db.VarChar(128)
+  productionLeadId String?  @db.VarChar(128)
+  createdBy        String   @db.VarChar(128)
+  createdAt        DateTime @default(now()) @db.DateTime(3)
+}
+
+/// Retained for the earlier demonstration; its references are not local work orders.
+model WorkOrderLink {
+  id              String   @id @db.VarChar(36)
+  qmsWorkOrderId  String   @unique @db.VarChar(128)
+  productionLeadId String @db.VarChar(128)
+  createdBy       String   @db.VarChar(128)
+  createdAt       DateTime @default(now()) @db.DateTime(3)
+}

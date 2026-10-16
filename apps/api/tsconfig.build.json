@@ -2,8 +2,14 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
+    "rewriteRelativeImportExtensions": true,
     "outDir": "dist",
     "rootDir": "../.."
   },
-  "include": ["src/**/*.ts", "../../packages/contracts/src/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "../../packages/contracts/src/**/*.ts",
+    "../../tests/support/work-order-demo.ts",
+    "../../tests/support/local-auth-demo.ts"
+  ]
 }

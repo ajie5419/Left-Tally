@@ -1,5 +1,7 @@
 import { z } from 'zod';
 export { z };
+export * from './work-orders.ts';
+export * from './session.ts';
 
 /** Service liveness does not represent database, identity or business readiness. */
 export const healthSchema = z
@@ -107,10 +109,20 @@ export const BusinessErrorCode: Readonly<{
   readonly VALIDATION_FAILED: 'VALIDATION_FAILED';
   readonly NOT_FOUND: 'NOT_FOUND';
   readonly FORBIDDEN: 'FORBIDDEN';
+  readonly WORK_ORDER_NUMBER_EXISTS: 'WORK_ORDER_NUMBER_EXISTS';
+  readonly ACCOUNT_USERNAME_EXISTS: 'ACCOUNT_USERNAME_EXISTS';
+  readonly INVALID_CREDENTIALS: 'INVALID_CREDENTIALS';
+  readonly ACCOUNT_LAST_ADMIN: 'ACCOUNT_LAST_ADMIN';
+  readonly SOURCE_UNAVAILABLE: 'SOURCE_UNAVAILABLE';
 }> = Object.freeze({
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   NOT_FOUND: 'NOT_FOUND',
   FORBIDDEN: 'FORBIDDEN',
+  WORK_ORDER_NUMBER_EXISTS: 'WORK_ORDER_NUMBER_EXISTS',
+  ACCOUNT_USERNAME_EXISTS: 'ACCOUNT_USERNAME_EXISTS',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  ACCOUNT_LAST_ADMIN: 'ACCOUNT_LAST_ADMIN',
+  SOURCE_UNAVAILABLE: 'SOURCE_UNAVAILABLE',
 });
 
 export type BusinessErrorCodeType =

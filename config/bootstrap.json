@@ -1,5 +1,5 @@
 {
-  "phase": "BOOTSTRAP",
+  "phase": "CORE",
   "required": [
     "check:static",
     "test:unit",
@@ -17,7 +17,12 @@
     "tests/unit/ci.test.ts",
     "tests/e2e/bootstrap.spec.ts",
     "scripts/negative.mjs",
-    "scripts/database.mjs"
+    "scripts/database.mjs",
+    "tests/unit/work-orders.test.ts",
+    "tests/unit/runtime.test.ts",
+    "tests/integration/work-orders.test.ts",
+    "tests/e2e/work-orders.spec.ts"
   ],
-  "migrationApplicability": "INITIAL_NO_SCHEMA_NO_PREVIOUS_DELIVERY"
+  "migrationApplicability": "INITIAL_BUSINESS_SCHEMA_NO_PREVIOUS_BUSINESS_DELIVERY",
+  "browserExpectedTests": 8
 }
