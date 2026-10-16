@@ -36,6 +36,14 @@ function queueAccountSave(accountId: string, task: () => Promise<void>) {
   return next;
 }
 
+async function reauthenticateIfSelf(targetId: string, message: string) {
+  // Changing my own credentials revokes my sessions; privileged controls must not linger.
+  if (store.identity?.id !== targetId) return;
+  store.clearIdentity();
+  store.notice = message;
+  await router.replace('/login');
+}
+
 async function load() {
   loading.value = true;
   error.value = '';
@@ -98,6 +106,10 @@ async function savePermissions(
         permissions: account.permissions,
         accountAdmin: account.accountAdmin,
       });
+      await reauthenticateIfSelf(
+        account.id,
+        '已更新当前登录账户的权限，请重新登录。',
+      );
       notice.value = `已更新 ${account.name} 的权限；该账户需要重新登录。`;
     } catch (cause) {
       error.value =
@@ -115,6 +127,10 @@ async function reset(account: Account, password: string) {
   notice.value = '';
   try {
     await store.resetPassword(account.id, password);
+    await reauthenticateIfSelf(
+      account.id,
+      '已重置当前登录账户的密码，请重新登录。',
+    );
     notice.value = `已重置 ${account.name} 的密码；该账户需要重新登录。`;
   } catch (cause) {
     error.value =
